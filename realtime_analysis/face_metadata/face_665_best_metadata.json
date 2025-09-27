@@ -1,0 +1,16 @@
+{
+  "face_id": 665,
+  "image_filename": "face_665_best.jpg",
+  "frame_number": 2189,
+  "bbox": [
+    1380,
+    459,
+    1413,
+    501
+  ],
+  "confidence": 0.8022686839103699,
+  "quality_score": 0.5791438927363493,
+  "combined_score": 0.7353312465581636,
+  "timestamp": 1758996445.2454998,
+  "is_best_image": true
+}

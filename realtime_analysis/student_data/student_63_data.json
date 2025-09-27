@@ -1,0 +1,57 @@
+{
+  "student_id": "student_63",
+  "tracking_info": {
+    "total_appearances": 3,
+    "first_seen_frame": 3764,
+    "last_seen_frame": 3767,
+    "position_zone": "front"
+  },
+  "behavior_analysis": {
+    "dominant_activity": "writing",
+    "activity_distribution": {
+      "writing": 3
+    },
+    "engagement_rate": "100.0%",
+    "attention_distribution": {
+      "focused": 3
+    }
+  },
+  "timeline": [
+    {
+      "frame": 3764,
+      "timestamp": 150.56,
+      "center": [
+        920.0,
+        171.5
+      ],
+      "activity": "writing",
+      "attention_level": "focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3766,
+      "timestamp": 150.64,
+      "center": [
+        922.0,
+        175.5
+      ],
+      "activity": "writing",
+      "attention_level": "focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3767,
+      "timestamp": 150.68,
+      "center": [
+        921.5,
+        174.0
+      ],
+      "activity": "writing",
+      "attention_level": "focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    }
+  ]
+}

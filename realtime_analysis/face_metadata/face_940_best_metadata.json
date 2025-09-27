@@ -1,0 +1,16 @@
+{
+  "face_id": 940,
+  "image_filename": "face_940_best.jpg",
+  "frame_number": 4085,
+  "bbox": [
+    1272,
+    382,
+    1304,
+    421
+  ],
+  "confidence": 0.7960796356201172,
+  "quality_score": 0.6012585532568508,
+  "combined_score": 0.7376333109111373,
+  "timestamp": 1758996445.2856503,
+  "is_best_image": true
+}

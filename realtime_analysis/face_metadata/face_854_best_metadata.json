@@ -1,0 +1,16 @@
+{
+  "face_id": 854,
+  "image_filename": "face_854_best.jpg",
+  "frame_number": 3031,
+  "bbox": [
+    1626,
+    478,
+    1657,
+    513
+  ],
+  "confidence": 0.7789953947067261,
+  "quality_score": 0.45018229073645966,
+  "combined_score": 0.680351463515646,
+  "timestamp": 1758996445.2836473,
+  "is_best_image": true
+}

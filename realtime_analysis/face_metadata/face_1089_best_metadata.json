@@ -1,0 +1,16 @@
+{
+  "face_id": 1089,
+  "image_filename": "face_1089_best.jpg",
+  "frame_number": 3371,
+  "bbox": [
+    622,
+    200,
+    646,
+    229
+  ],
+  "confidence": 0.7783706784248352,
+  "quality_score": 0.5828746866767169,
+  "combined_score": 0.7197218809003997,
+  "timestamp": 1758996445.442218,
+  "is_best_image": true
+}

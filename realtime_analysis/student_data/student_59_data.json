@@ -1,0 +1,70 @@
+{
+  "student_id": "student_59",
+  "tracking_info": {
+    "total_appearances": 4,
+    "first_seen_frame": 3258,
+    "last_seen_frame": 3281,
+    "position_zone": "front"
+  },
+  "behavior_analysis": {
+    "dominant_activity": "listening",
+    "activity_distribution": {
+      "listening": 4
+    },
+    "engagement_rate": "100.0%",
+    "attention_distribution": {
+      "partially_focused": 3,
+      "distracted": 1
+    }
+  },
+  "timeline": [
+    {
+      "frame": 3258,
+      "timestamp": 130.32,
+      "center": [
+        1592.0,
+        402.0
+      ],
+      "activity": "listening",
+      "attention_level": "partially_focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3259,
+      "timestamp": 130.36,
+      "center": [
+        1592.5,
+        402.5
+      ],
+      "activity": "listening",
+      "attention_level": "partially_focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3261,
+      "timestamp": 130.44,
+      "center": [
+        1592.5,
+        402.5
+      ],
+      "activity": "listening",
+      "attention_level": "distracted",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3281,
+      "timestamp": 131.24,
+      "center": [
+        1635.5,
+        457.0
+      ],
+      "activity": "listening",
+      "attention_level": "partially_focused",
+      "engagement": "engaged",
+      "position_zone": "middle"
+    }
+  ]
+}

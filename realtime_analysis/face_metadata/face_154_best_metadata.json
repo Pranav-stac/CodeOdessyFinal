@@ -1,0 +1,16 @@
+{
+  "face_id": 154,
+  "image_filename": "face_154_best.jpg",
+  "frame_number": 1020,
+  "bbox": [
+    731,
+    214,
+    754,
+    242
+  ],
+  "confidence": 0.7024160027503967,
+  "quality_score": 0.5961579336952807,
+  "combined_score": 0.6705385820338619,
+  "timestamp": 1758996445.1978574,
+  "is_best_image": true
+}

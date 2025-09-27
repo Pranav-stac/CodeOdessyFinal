@@ -1,0 +1,16 @@
+{
+  "face_id": 470,
+  "image_filename": "face_470_best.jpg",
+  "frame_number": 1515,
+  "bbox": [
+    647,
+    199,
+    670,
+    226
+  ],
+  "confidence": 0.7589967250823975,
+  "quality_score": 0.5904392603028279,
+  "combined_score": 0.7084294856485265,
+  "timestamp": 1758996445.2189505,
+  "is_best_image": true
+}

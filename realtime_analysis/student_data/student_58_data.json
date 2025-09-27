@@ -1,0 +1,661 @@
+{
+  "student_id": "student_58",
+  "tracking_info": {
+    "total_appearances": 53,
+    "first_seen_frame": 3208,
+    "last_seen_frame": 4060,
+    "position_zone": "front"
+  },
+  "behavior_analysis": {
+    "dominant_activity": "unknown",
+    "activity_distribution": {
+      "unknown": 30,
+      "writing": 14,
+      "listening": 9
+    },
+    "engagement_rate": "88.7%",
+    "attention_distribution": {
+      "partially_focused": 32,
+      "distracted": 7,
+      "focused": 14
+    }
+  },
+  "timeline": [
+    {
+      "frame": 3208,
+      "timestamp": 128.32,
+      "center": [
+        1520.0,
+        357.5
+      ],
+      "activity": "unknown",
+      "attention_level": "partially_focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3209,
+      "timestamp": 128.36,
+      "center": [
+        1520.5,
+        357.0
+      ],
+      "activity": "unknown",
+      "attention_level": "distracted",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3210,
+      "timestamp": 128.4,
+      "center": [
+        1519.5,
+        357.0
+      ],
+      "activity": "unknown",
+      "attention_level": "partially_focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3211,
+      "timestamp": 128.44,
+      "center": [
+        1520.0,
+        357.0
+      ],
+      "activity": "writing",
+      "attention_level": "focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3219,
+      "timestamp": 128.76,
+      "center": [
+        1523.0,
+        358.5
+      ],
+      "activity": "unknown",
+      "attention_level": "partially_focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3220,
+      "timestamp": 128.8,
+      "center": [
+        1525.5,
+        357.5
+      ],
+      "activity": "listening",
+      "attention_level": "partially_focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3305,
+      "timestamp": 132.2,
+      "center": [
+        1520.0,
+        366.5
+      ],
+      "activity": "unknown",
+      "attention_level": "partially_focused",
+      "engagement": "",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3306,
+      "timestamp": 132.24,
+      "center": [
+        1519.0,
+        367.0
+      ],
+      "activity": "unknown",
+      "attention_level": "partially_focused",
+      "engagement": "",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3307,
+      "timestamp": 132.28,
+      "center": [
+        1519.0,
+        367.0
+      ],
+      "activity": "writing",
+      "attention_level": "focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3438,
+      "timestamp": 137.52,
+      "center": [
+        1522.0,
+        366.0
+      ],
+      "activity": "writing",
+      "attention_level": "focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3439,
+      "timestamp": 137.56,
+      "center": [
+        1522.5,
+        366.0
+      ],
+      "activity": "writing",
+      "attention_level": "focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3440,
+      "timestamp": 137.6,
+      "center": [
+        1522.5,
+        366.0
+      ],
+      "activity": "listening",
+      "attention_level": "partially_focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3441,
+      "timestamp": 137.64,
+      "center": [
+        1522.5,
+        366.0
+      ],
+      "activity": "writing",
+      "attention_level": "focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3442,
+      "timestamp": 137.68,
+      "center": [
+        1522.5,
+        366.0
+      ],
+      "activity": "writing",
+      "attention_level": "focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3443,
+      "timestamp": 137.72,
+      "center": [
+        1522.5,
+        366.0
+      ],
+      "activity": "writing",
+      "attention_level": "focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3630,
+      "timestamp": 145.2,
+      "center": [
+        1520.0,
+        366.5
+      ],
+      "activity": "unknown",
+      "attention_level": "partially_focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3631,
+      "timestamp": 145.24,
+      "center": [
+        1520.0,
+        366.0
+      ],
+      "activity": "unknown",
+      "attention_level": "partially_focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3643,
+      "timestamp": 145.72,
+      "center": [
+        1519.5,
+        366.0
+      ],
+      "activity": "unknown",
+      "attention_level": "partially_focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3645,
+      "timestamp": 145.8,
+      "center": [
+        1519.5,
+        366.0
+      ],
+      "activity": "unknown",
+      "attention_level": "partially_focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3649,
+      "timestamp": 145.96,
+      "center": [
+        1519.5,
+        366.5
+      ],
+      "activity": "unknown",
+      "attention_level": "partially_focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3651,
+      "timestamp": 146.04,
+      "center": [
+        1519.5,
+        367.0
+      ],
+      "activity": "unknown",
+      "attention_level": "distracted",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3653,
+      "timestamp": 146.12,
+      "center": [
+        1520.0,
+        366.5
+      ],
+      "activity": "writing",
+      "attention_level": "focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3654,
+      "timestamp": 146.16,
+      "center": [
+        1521.0,
+        366.5
+      ],
+      "activity": "unknown",
+      "attention_level": "partially_focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3659,
+      "timestamp": 146.36,
+      "center": [
+        1520.5,
+        366.5
+      ],
+      "activity": "writing",
+      "attention_level": "focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3660,
+      "timestamp": 146.4,
+      "center": [
+        1520.5,
+        366.5
+      ],
+      "activity": "unknown",
+      "attention_level": "partially_focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3663,
+      "timestamp": 146.52,
+      "center": [
+        1520.5,
+        366.5
+      ],
+      "activity": "writing",
+      "attention_level": "focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3673,
+      "timestamp": 146.92,
+      "center": [
+        1522.0,
+        365.5
+      ],
+      "activity": "listening",
+      "attention_level": "partially_focused",
+      "engagement": "",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3674,
+      "timestamp": 146.96,
+      "center": [
+        1521.5,
+        365.5
+      ],
+      "activity": "writing",
+      "attention_level": "focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3690,
+      "timestamp": 147.6,
+      "center": [
+        1522.5,
+        364.0
+      ],
+      "activity": "unknown",
+      "attention_level": "partially_focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3691,
+      "timestamp": 147.64,
+      "center": [
+        1522.5,
+        364.0
+      ],
+      "activity": "listening",
+      "attention_level": "partially_focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3692,
+      "timestamp": 147.68,
+      "center": [
+        1521.5,
+        364.0
+      ],
+      "activity": "listening",
+      "attention_level": "partially_focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3693,
+      "timestamp": 147.72,
+      "center": [
+        1521.5,
+        364.0
+      ],
+      "activity": "writing",
+      "attention_level": "focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3694,
+      "timestamp": 147.76,
+      "center": [
+        1521.5,
+        364.0
+      ],
+      "activity": "writing",
+      "attention_level": "focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3695,
+      "timestamp": 147.8,
+      "center": [
+        1521.5,
+        364.0
+      ],
+      "activity": "listening",
+      "attention_level": "partially_focused",
+      "engagement": "",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3696,
+      "timestamp": 147.84,
+      "center": [
+        1521.5,
+        364.0
+      ],
+      "activity": "listening",
+      "attention_level": "partially_focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3697,
+      "timestamp": 147.88,
+      "center": [
+        1521.5,
+        364.5
+      ],
+      "activity": "listening",
+      "attention_level": "partially_focused",
+      "engagement": "",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3698,
+      "timestamp": 147.92,
+      "center": [
+        1521.5,
+        363.5
+      ],
+      "activity": "listening",
+      "attention_level": "partially_focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3699,
+      "timestamp": 147.96,
+      "center": [
+        1522.0,
+        364.0
+      ],
+      "activity": "writing",
+      "attention_level": "focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3920,
+      "timestamp": 156.8,
+      "center": [
+        1522.0,
+        365.0
+      ],
+      "activity": "unknown",
+      "attention_level": "partially_focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3926,
+      "timestamp": 157.04,
+      "center": [
+        1522.0,
+        365.0
+      ],
+      "activity": "unknown",
+      "attention_level": "partially_focused",
+      "engagement": "",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3927,
+      "timestamp": 157.08,
+      "center": [
+        1522.5,
+        365.0
+      ],
+      "activity": "unknown",
+      "attention_level": "partially_focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3928,
+      "timestamp": 157.12,
+      "center": [
+        1522.0,
+        365.0
+      ],
+      "activity": "unknown",
+      "attention_level": "distracted",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3929,
+      "timestamp": 157.16,
+      "center": [
+        1522.0,
+        365.0
+      ],
+      "activity": "unknown",
+      "attention_level": "partially_focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3930,
+      "timestamp": 157.2,
+      "center": [
+        1522.5,
+        365.0
+      ],
+      "activity": "unknown",
+      "attention_level": "partially_focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3931,
+      "timestamp": 157.24,
+      "center": [
+        1522.0,
+        365.0
+      ],
+      "activity": "unknown",
+      "attention_level": "partially_focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3932,
+      "timestamp": 157.28,
+      "center": [
+        1522.0,
+        365.0
+      ],
+      "activity": "unknown",
+      "attention_level": "distracted",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3933,
+      "timestamp": 157.32,
+      "center": [
+        1522.0,
+        365.0
+      ],
+      "activity": "unknown",
+      "attention_level": "partially_focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3934,
+      "timestamp": 157.36,
+      "center": [
+        1522.0,
+        365.0
+      ],
+      "activity": "unknown",
+      "attention_level": "partially_focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3935,
+      "timestamp": 157.4,
+      "center": [
+        1522.0,
+        365.0
+      ],
+      "activity": "unknown",
+      "attention_level": "distracted",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3936,
+      "timestamp": 157.44,
+      "center": [
+        1522.0,
+        365.0
+      ],
+      "activity": "unknown",
+      "attention_level": "partially_focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 3937,
+      "timestamp": 157.48,
+      "center": [
+        1522.0,
+        365.0
+      ],
+      "activity": "unknown",
+      "attention_level": "distracted",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 4053,
+      "timestamp": 162.12,
+      "center": [
+        1523.0,
+        366.0
+      ],
+      "activity": "unknown",
+      "attention_level": "distracted",
+      "engagement": "engaged",
+      "position_zone": "front"
+    },
+    {
+      "frame": 4060,
+      "timestamp": 162.4,
+      "center": [
+        1523.0,
+        366.5
+      ],
+      "activity": "unknown",
+      "attention_level": "partially_focused",
+      "engagement": "engaged",
+      "position_zone": "front"
+    }
+  ]
+}

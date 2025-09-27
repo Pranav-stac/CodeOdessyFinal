@@ -1,0 +1,25 @@
+{
+  "analysis_info": {
+    "video_path": "Activity.mp4",
+    "total_frames": 4328,
+    "analysis_date": "2025-09-27T23:37:25.490944",
+    "output_directory": "realtime_analysis"
+  },
+  "overview": {
+    "total_students_tracked": 66,
+    "total_unique_faces": 35,
+    "total_face_images_captured": 188,
+    "models_loaded": [
+      "detection",
+      "pose",
+      "face"
+    ]
+  },
+  "file_structure": {
+    "face_images": "face_images/",
+    "face_metadata": "face_metadata/",
+    "student_data": "student_data/",
+    "activity_data": "activity_data/",
+    "statistics": "statistics/"
+  }
+}

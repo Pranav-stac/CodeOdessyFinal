@@ -1,0 +1,16 @@
+{
+  "face_id": 486,
+  "image_filename": "face_486_best.jpg",
+  "frame_number": 1601,
+  "bbox": [
+    1388,
+    459,
+    1423,
+    501
+  ],
+  "confidence": 0.7294611930847168,
+  "quality_score": 0.5871699458304296,
+  "combined_score": 0.6867738189084306,
+  "timestamp": 1758996445.2209532,
+  "is_best_image": true
+}

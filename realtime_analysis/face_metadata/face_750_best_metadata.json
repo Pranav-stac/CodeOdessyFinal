@@ -1,0 +1,16 @@
+{
+  "face_id": 750,
+  "image_filename": "face_750_best.jpg",
+  "frame_number": 2401,
+  "bbox": [
+    1380,
+    452,
+    1413,
+    489
+  ],
+  "confidence": 0.7936243414878845,
+  "quality_score": 0.5998875988321745,
+  "combined_score": 0.7355033186911715,
+  "timestamp": 1758996445.2596457,
+  "is_best_image": true
+}

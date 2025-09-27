@@ -1,0 +1,16 @@
+{
+  "face_id": 24,
+  "image_filename": "face_24_best.jpg",
+  "frame_number": 32,
+  "bbox": [
+    1035,
+    163,
+    1055,
+    189
+  ],
+  "confidence": 0.7180642485618591,
+  "quality_score": 0.586725844995815,
+  "combined_score": 0.6786627274920458,
+  "timestamp": 1758996445.1494372,
+  "is_best_image": true
+}

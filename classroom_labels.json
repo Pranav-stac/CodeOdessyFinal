@@ -1,0 +1,112 @@
+[
+    {
+        "name": "person",
+        "id": 1,
+        "color": "#ff0000",
+        "type": "rectangle",
+        "attributes": [
+            {
+                "name": "activity",
+                "input_type": "select",
+                "mutable": true,
+                "values": [
+                    "writing",
+                    "listening",
+                    "talking",
+                    "using_phone",
+                    "sleeping",
+                    "raising_hand",
+                    "walking",
+                    "distracted",
+                    "reading",
+                    "eating",
+                    "unknown"
+                ],
+                "default_value": "unknown"
+            },
+            {
+                "name": "posture",
+                "input_type": "select",
+                "mutable": true,
+                "values": [
+                    "sitting",
+                    "standing",
+                    "leaning",
+                    "slouching"
+                ],
+                "default_value": "sitting"
+            },
+            {
+                "name": "attention_level",
+                "input_type": "select",
+                "mutable": true,
+                "values": [
+                    "focused",
+                    "partially_focused",
+                    "distracted",
+                    "not_visible"
+                ],
+                "default_value": "not_visible"
+            },
+            {
+                "name": "engagement",
+                "input_type": "checkbox",
+                "mutable": true,
+                "values": [
+                    "engaged"
+                ],
+                "default_value": ""
+            }
+        ]
+    },
+    {
+        "name": "desk",
+        "id": 2,
+        "color": "#00ff00",
+        "type": "rectangle",
+        "attributes": []
+    },
+    {
+        "name": "chair",
+        "id": 3,
+        "color": "#0000ff",
+        "type": "rectangle",
+        "attributes": []
+    },
+    {
+        "name": "whiteboard",
+        "id": 4,
+        "color": "#ffff00",
+        "type": "rectangle",
+        "attributes": [
+            {
+                "name": "in_use",
+                "input_type": "checkbox",
+                "mutable": true,
+                "values": [
+                    "in_use"
+                ],
+                "default_value": ""
+            }
+        ]
+    },
+    {
+        "name": "door",
+        "id": 5,
+        "color": "#ff00ff",
+        "type": "rectangle",
+        "attributes": [
+            {
+                "name": "state",
+                "input_type": "select",
+                "mutable": true,
+                "values": [
+                    "open",
+                    "closed",
+                    "partially_open"
+                ],
+                "default_value": "closed"
+            }
+        ]
+    }
+]

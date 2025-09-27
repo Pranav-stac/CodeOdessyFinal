@@ -1,0 +1,16 @@
+{
+  "face_id": 290,
+  "image_filename": "face_290_best.jpg",
+  "frame_number": 1088,
+  "bbox": [
+    1005,
+    134,
+    1024,
+    157
+  ],
+  "confidence": 0.720150351524353,
+  "quality_score": 0.5935366764307506,
+  "combined_score": 0.6821662489962723,
+  "timestamp": 1758996445.194857,
+  "is_best_image": true
+}
