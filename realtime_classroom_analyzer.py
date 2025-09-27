@@ -167,10 +167,11 @@ class FaceTracker:
         return list(self.faces.keys())
 
 class RealtimeClassroomAnalyzer:
-    def __init__(self, video_path, output_dir="realtime_analysis", headless_mode=False):
+    def __init__(self, video_path, output_dir="realtime_analysis", headless_mode=False, fast_mode=False):
         self.video_path = video_path
         self.output_dir = output_dir
         self.headless_mode = headless_mode
+        self.fast_mode = fast_mode
         os.makedirs(output_dir, exist_ok=True)
         
         # Load classroom labels schema
@@ -288,7 +289,16 @@ class RealtimeClassroomAnalyzer:
             model_path = os.path.join(weights_dir, filename)
             if os.path.exists(model_path):
                 try:
-                    models[model_type] = YOLO(model_path)
+                    model = YOLO(model_path)
+                    
+                    # Optimize for inference speed (maintains accuracy)
+                    if hasattr(model, 'model'):
+                        model.model.eval()
+                        # Fuse layers for faster inference
+                        if hasattr(model.model, 'fuse'):
+                            model.model.fuse()
+                    
+                    models[model_type] = model
                     print(f"✅ Loaded {model_type}: {filename}")
                 except Exception as e:
                     print(f"❌ Failed to load {model_type}: {e}")
@@ -340,7 +350,6 @@ class RealtimeClassroomAnalyzer:
                 self.update_student_tracking(frame_data, frame_count)
                 
                 if display:
-                    # Create visualization only if displaying
                     vis_frame = self.create_visualization(frame.copy(), frame_data, timestamp)
                 elif save_frames and frame_count % 30 == 0:  # Save every 30th frame in headless mode
                     # Create minimal visualization for frame saving
@@ -349,7 +358,7 @@ class RealtimeClassroomAnalyzer:
                     cv2.imwrite(save_path, vis_frame)
                 
                 frame_count += 1
-                
+            
                 # Progress update for headless mode
                 if not display:
                     current_time = time.time()
@@ -361,7 +370,6 @@ class RealtimeClassroomAnalyzer:
             if display:
                 # Display mode - show frame and handle input
                 if vis_frame is not None:
-                    # Resize for display
                     vis_display = cv2.resize(vis_frame, (display_width, display_height))
                     
                     # Show frame
@@ -1144,7 +1152,7 @@ class RealtimeClassroomAnalyzer:
                     "behavior_analysis": {
                         "dominant_activity": str(Counter(activities).most_common(1)[0][0]) if activities else "unknown",
                         "activity_distribution": {str(k): int(v) for k, v in Counter(activities).items()},
-                        "engagement_rate": f"{len(engagements)/len(track)*100:.1f}%",
+                    "engagement_rate": f"{len(engagements)/len(track)*100:.1f}%",
                         "attention_distribution": {str(k): int(v) for k, v in Counter(attention_levels).items()}
                     },
                     "face_data": self._find_student_face_with_base64(student_id)
