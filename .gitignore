@@ -1,1 +1,6 @@
 /AI_Model_Weights
+*.mp4
+realtime_analysis
+dist
+build
+analysis_results

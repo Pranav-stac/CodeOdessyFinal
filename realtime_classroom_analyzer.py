@@ -7,6 +7,7 @@ import cv2
 import json
 import numpy as np
 import os
+import sys
 from datetime import datetime
 from ultralytics import YOLO
 from collections import defaultdict, Counter
@@ -276,8 +277,31 @@ class RealtimeClassroomAnalyzer:
     def load_models(self):
         """Load available YOLO models"""
         models = {}
-        # Update weights_dir to the new path
-        weights_dir = r"E:\Pranav\Hackathons\CodeOdessyFinal\AI_Model_Weights\AI_Model_Weights"
+        
+        # Get the directory where the executable is running from
+        try:
+            if getattr(sys, 'frozen', False):
+                # Running as PyInstaller executable
+                base_path = sys._MEIPASS
+            else:
+                # Running as script
+                base_path = os.path.dirname(os.path.abspath(__file__))
+        except (NameError, AttributeError):
+            # Fallback if sys is not available
+            base_path = os.path.dirname(os.path.abspath(__file__))
+            print("⚠️ sys module not available, using script directory")
+        
+        # Look for AI_Model_Weights in the executable directory
+        weights_dir = os.path.join(base_path, "AI_Model_Weights", "AI_Model_Weights")
+        
+        # If not found in executable, try current directory
+        if not os.path.exists(weights_dir):
+            weights_dir = os.path.join(base_path, "AI_Model_Weights")
+        
+        # If still not found, try relative to script location
+        if not os.path.exists(weights_dir):
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            weights_dir = os.path.join(script_dir, "AI_Model_Weights", "AI_Model_Weights")
         
         model_files = {
             'detection': 'yolov8s.pt',
@@ -852,20 +876,49 @@ class RealtimeClassroomAnalyzer:
                         attention = 'focused'
                     elif pose_analysis['activity'] == 'writing':
                         attention = 'focused'
-                    elif random.random() < engagement_prob:
-                        attention = 'partially_focused'
                     else:
-                        attention = 'distracted'
+                        try:
+                            # Use random for attention calculation
+                            rand_val = random.random()
+                            if rand_val < engagement_prob:
+                                attention = 'partially_focused'
+                            else:
+                                attention = 'distracted'
+                        except Exception as e:
+                            # Fallback if random fails in executable
+                            print(f"⚠️ Random module error in attention calculation: {e}")
+                            # Use deterministic fallback based on position
+                            if engagement_prob > 0.7:
+                                attention = 'partially_focused'
+                            else:
+                                attention = 'distracted'
                     annotation['attributes'][attr_name] = attention
                 
                 elif attr_name == 'engagement':
                     if pose_analysis['activity'] in ['raising_hand', 'writing']:
                         engagement = 'engaged'
-                    elif random.random() < engagement_prob:
-                        engagement = 'engaged'
                     else:
-                        engagement = ''
+                        try:
+                            # Use random for engagement calculation
+                            rand_val = random.random()
+                            if rand_val < engagement_prob:
+                                engagement = 'engaged'
+                            else:
+                                engagement = 'not_engaged'
+                        except Exception as e:
+                            # Fallback if random fails in executable
+                            print(f"⚠️ Random module error in executable: {e}")
+                            # Use deterministic fallback based on position
+                            if engagement_prob > 0.7:
+                                engagement = 'engaged'
+                            else:
+                                engagement = 'not_engaged'
+                    
                     annotation['attributes'][attr_name] = engagement
+                    
+                    # Debug logging for engagement calculation
+                    if i == 0:  # Only log for first person to avoid spam
+                        print(f"🔍 Person {i}: activity={pose_analysis['activity']}, engagement_prob={engagement_prob:.2f}, engagement={engagement}")
             
             # Update frame stats
             activity = annotation['attributes'].get('activity', 'unknown')
@@ -1275,6 +1328,9 @@ class RealtimeClassroomAnalyzer:
     def save_comprehensive_report(self):
         """Save one comprehensive JSON with all analysis data"""
         print("📋 Creating comprehensive analysis report...")
+        
+        # Ensure output directory exists
+        os.makedirs(self.output_dir, exist_ok=True)
         
         comprehensive_data = {
             "analysis_metadata": {
