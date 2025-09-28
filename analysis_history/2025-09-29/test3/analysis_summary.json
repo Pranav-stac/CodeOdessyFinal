@@ -1,0 +1,25 @@
+{
+  "analysis_info": {
+    "video_path": "video_processing\\2025-09-29\\input\\test3.mp4",
+    "total_frames": 250,
+    "analysis_date": "2025-09-28T09:25:56.609944",
+    "output_directory": "analysis_history\\2025-09-29\\test3"
+  },
+  "overview": {
+    "total_students_tracked": 29,
+    "total_unique_faces": 37,
+    "total_face_images_captured": 52,
+    "models_loaded": [
+      "detection",
+      "pose",
+      "face"
+    ]
+  },
+  "file_structure": {
+    "face_images": "face_images/",
+    "face_metadata": "face_metadata/",
+    "student_data": "student_data/",
+    "activity_data": "activity_data/",
+    "statistics": "statistics/"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "generated_at": "2025-09-28T07:50:02.830126",
+  "summary": {
+    "total_persons": 0,
+    "total_videos_processed": 0,
+    "attendance_records": {}
+  },
+  "detailed_records": {},
+  "face_database_stats": {
+    "total_persons": 0,
+    "persons_with_multiple_videos": 0
+  }
+}

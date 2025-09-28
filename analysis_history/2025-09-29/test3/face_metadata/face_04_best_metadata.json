@@ -1,0 +1,16 @@
+{
+  "face_id": 4,
+  "image_filename": "face_04_best.jpg",
+  "frame_number": 99,
+  "bbox": [
+    223,
+    277,
+    250,
+    320
+  ],
+  "confidence": 0.763327419757843,
+  "quality_score": 0.5128617188448523,
+  "combined_score": 0.6881877094839457,
+  "timestamp": 1759031756.5222335,
+  "is_best_image": true
+}

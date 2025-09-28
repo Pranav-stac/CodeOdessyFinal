@@ -10,8 +10,8 @@ import os
 import subprocess
 import json
 from pathlib import Path
-import webbrowser
 from datetime import datetime
+import webbrowser
 import base64
 from PIL import Image, ImageTk
 import io
@@ -26,14 +26,22 @@ except ImportError:
 
 # Import your existing analyzer
 from realtime_classroom_analyzer import RealtimeClassroomAnalyzer
+from analysis_viewer import AnalysisViewer
+from video_face_matcher import VideoFaceMatcher
+from vector_face_matcher import VectorFaceMatcher as EnhancedFaceMatcher
+from lecture_classifier import LectureClassifier
+from lightweight_vision_classifier import LightweightVisionClassifier as VisionLectureClassifier
+from data_manager import DataManager
+from automated_video_processor import AutomatedVideoProcessor
+from firebase_sync import FirebaseSync, FIREBASE_CONFIG
 
 class ClassroomAnalyzerGUI:
     def __init__(self, root):
         self.root = root
         self.root.title("🎓 Classroom Video Analyzer")
-        self.root.geometry("1300x1000")  # Even larger window to prevent cropping
+        self.root.geometry("1400x1200")  # Larger window for all features
         self.root.configure(bg='#f0f0f0')
-        self.root.minsize(1200, 800)  # Set minimum size to prevent cropping
+        self.root.minsize(1300, 900)  # Set minimum size to prevent cropping
         self.root.resizable(True, True)  # Allow resizing
         
         # Set custom icon
@@ -49,6 +57,32 @@ class ClassroomAnalyzerGUI:
         self.is_analyzing = False
         self.analyzer = None
         self.model_status = {"detection": False, "pose": False, "face": False}
+        
+        # New components
+        self.face_matcher = VideoFaceMatcher()
+        self.enhanced_face_matcher = EnhancedFaceMatcher()
+        self.lecture_classifier = LectureClassifier()
+        self.vision_classifier = VisionLectureClassifier()
+        self.data_manager = DataManager()
+        self.analysis_viewer = None
+        self.auto_processor = AutomatedVideoProcessor()
+        self.current_session_id = None
+        
+        # Initialize Firebase sync
+        self.firebase_sync = FirebaseSync(FIREBASE_CONFIG)
+        
+        # Initialize auto-processing preferences
+        self.auto_show_footage = tk.BooleanVar(value=False)
+        self.auto_realtime_display = tk.BooleanVar(value=True)
+        
+        # Auto-detect and process videos on startup (disabled - only run when button clicked)
+        # self.auto_detect_videos()
+        
+        # Check classification method
+        if hasattr(self.lecture_classifier, 'model') and self.lecture_classifier.model:
+            self.classification_method = "LLM-based"
+        else:
+            self.classification_method = "Rule-based"
         
         # Create GUI
         self.create_widgets()
@@ -241,8 +275,21 @@ class ClassroomAnalyzerGUI:
         
     def create_widgets(self):
         """Create all GUI widgets with proper layout"""
-        # Main container
-        main_frame = ttk.Frame(self.root, padding="25")
+        # Create scrollable main container
+        canvas = tk.Canvas(self.root, bg='#f0f0f0')
+        scrollbar = ttk.Scrollbar(self.root, orient="vertical", command=canvas.yview)
+        scrollable_frame = ttk.Frame(canvas)
+        
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+        
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+        
+        # Main container with padding
+        main_frame = ttk.Frame(scrollable_frame, padding="25")
         main_frame.pack(fill=tk.BOTH, expand=True)
         
         # Title with icon
@@ -270,6 +317,10 @@ class ClassroomAnalyzerGUI:
         self.create_progress_section(main_frame)
         self.create_results_section(main_frame)
         self.create_status_bar(main_frame)
+        
+        # Pack canvas and scrollbar
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
         
     def create_video_section(self, parent):
         """Create video selection section"""
@@ -369,31 +420,104 @@ class ClassroomAnalyzerGUI:
         button_frame = ttk.Frame(section_frame)
         button_frame.pack(fill=tk.X, pady=(0, 15))
         
-        # First row of buttons
+        # First row - Main analysis buttons
         row1_frame = ttk.Frame(button_frame)
         row1_frame.pack(fill=tk.X, pady=(0, 10))
         
         self.start_button = ttk.Button(row1_frame, text="▶️ Start Analysis", 
                                      command=self.start_analysis, style='Action.TButton')
-        self.start_button.pack(side=tk.LEFT, padx=(0, 15))
+        self.start_button.pack(side=tk.LEFT, padx=(0, 10))
         
         self.stop_button = ttk.Button(row1_frame, text="⏹️ Stop Analysis", 
                                     command=self.stop_analysis, style='Danger.TButton', state='disabled')
-        self.stop_button.pack(side=tk.LEFT, padx=(0, 15))
+        self.stop_button.pack(side=tk.LEFT, padx=(0, 10))
         
         self.results_button = ttk.Button(row1_frame, text="📁 Open Results", 
                                        command=self.open_results, state='disabled')
-        self.results_button.pack(side=tk.LEFT, padx=(0, 15))
+        self.results_button.pack(side=tk.LEFT, padx=(0, 10))
         
-        # Second row for additional buttons
+        self.preview_button = ttk.Button(row1_frame, text="👁️ Preview Video", 
+                                       command=self.preview_video, state='disabled')
+        self.preview_button.pack(side=tk.LEFT, padx=(0, 10))
+        
+        ttk.Button(row1_frame, text="❓ Help", command=self.show_help).pack(side=tk.RIGHT)
+        
+        # Second row - Advanced analysis features
         row2_frame = ttk.Frame(button_frame)
         row2_frame.pack(fill=tk.X, pady=(5, 0))
         
-        self.preview_button = ttk.Button(row2_frame, text="👁️ Preview Video", 
-                                       command=self.preview_video, state='disabled')
-        self.preview_button.pack(side=tk.LEFT, padx=(0, 15))
+        ttk.Label(row2_frame, text="Advanced Features:", font=('Arial', 10, 'bold')).pack(side=tk.LEFT, padx=(0, 10))
         
-        ttk.Button(button_frame, text="❓ Help", command=self.show_help).pack(side=tk.RIGHT)
+        self.view_analysis_button = ttk.Button(row2_frame, text="📊 View Analysis", 
+                                             command=self.open_analysis_viewer, state='disabled')
+        self.view_analysis_button.pack(side=tk.LEFT, padx=(0, 10))
+        
+        self.match_faces_button = ttk.Button(row2_frame, text="👥 Match Faces", 
+                                           command=self.match_video_faces, state='disabled')
+        self.match_faces_button.pack(side=tk.LEFT, padx=(0, 10))
+        
+        self.classify_lecture_button = ttk.Button(row2_frame, text="🎓 Classify Lecture", 
+                                                command=self.classify_lecture_type, state='disabled')
+        self.classify_lecture_button.pack(side=tk.LEFT, padx=(0, 10))
+        
+        self.attendance_button = ttk.Button(row2_frame, text="📋 Attendance Report", 
+                                           command=self.generate_attendance_report, state='disabled')
+        self.attendance_button.pack(side=tk.LEFT, padx=(0, 10))
+        
+        # Third row - Automated processing features (more prominent)
+        row3_frame = ttk.LabelFrame(button_frame, text="🚀 Automated Processing", padding="10")
+        row3_frame.pack(fill=tk.X, pady=(15, 0))
+        
+        # Create a sub-frame for buttons
+        auto_buttons_frame = ttk.Frame(row3_frame)
+        auto_buttons_frame.pack(fill=tk.X)
+        
+        self.auto_process_button = ttk.Button(auto_buttons_frame, text="🚀 Auto Process Videos", 
+                                            command=self.start_auto_processing, style='Action.TButton')
+        self.auto_process_button.pack(side=tk.LEFT, padx=(0, 10))
+        
+        self.stop_auto_button = ttk.Button(auto_buttons_frame, text="⏹️ Stop Processing", 
+                                         command=self.stop_auto_processing, style='Danger.TButton', state='disabled')
+        self.stop_auto_button.pack(side=tk.LEFT, padx=(0, 10))
+        
+        self.history_button = ttk.Button(auto_buttons_frame, text="📚 View History", 
+                                       command=self.show_historical_reports)
+        self.history_button.pack(side=tk.LEFT, padx=(0, 10))
+        
+        self.folder_button = ttk.Button(auto_buttons_frame, text="📁 Open Video Folder", 
+                                      command=self.open_video_folder)
+        self.folder_button.pack(side=tk.LEFT, padx=(0, 10))
+        
+        # Firebase sync buttons
+        self.sync_button = ttk.Button(auto_buttons_frame, text="☁️ Sync to Firebase", 
+                                    command=self.sync_to_firebase)
+        self.sync_button.pack(side=tk.LEFT, padx=(0, 10))
+        
+        self.sync_all_button = ttk.Button(auto_buttons_frame, text="📊 Sync All Data", 
+                                        command=self.sync_all_historical_data)
+        self.sync_all_button.pack(side=tk.LEFT, padx=(0, 10))
+        
+        # Add options frame for automated processing
+        auto_options_frame = ttk.Frame(row3_frame)
+        auto_options_frame.pack(fill=tk.X, pady=(10, 0))
+        
+        # Show footage option for automated processing
+        self.auto_show_footage = tk.BooleanVar(value=False)
+        self.auto_show_footage_cb = ttk.Checkbutton(auto_options_frame, text="👁️ Show Footage During Auto Processing", 
+                                                   variable=self.auto_show_footage)
+        self.auto_show_footage_cb.pack(side=tk.LEFT, padx=(0, 20))
+        
+        # Real-time display option for automated processing
+        self.auto_realtime_display = tk.BooleanVar(value=True)
+        self.auto_realtime_display_cb = ttk.Checkbutton(auto_options_frame, text="⚡ Real-time Display Updates", 
+                                                       variable=self.auto_realtime_display)
+        self.auto_realtime_display_cb.pack(side=tk.LEFT, padx=(0, 20))
+        
+        # Add a separator and instructions
+        ttk.Separator(row3_frame, orient='horizontal').pack(fill=tk.X, pady=(10, 5))
+        
+        instructions_text = "💡 Add videos to video_processing/YYYY-MM-DD/input/ folder, then click 'Auto Process Videos'"
+        ttk.Label(row3_frame, text=instructions_text, style='Info.TLabel', wraplength=600).pack(anchor=tk.W)
         
     def create_progress_section(self, parent):
         """Create progress tracking section"""
@@ -540,6 +664,10 @@ class ClassroomAnalyzerGUI:
         self.stop_button.config(state='normal')
         self.results_button.config(state='disabled')
         self.preview_button.config(state='disabled')
+        self.view_analysis_button.config(state='disabled')
+        self.match_faces_button.config(state='disabled')
+        self.classify_lecture_button.config(state='disabled')
+        self.attendance_button.config(state='disabled')
         self.progress_var.set(0)
         self.progress_label.config(text="Starting analysis...")
         self.status_var.set("Analyzing...")
@@ -570,6 +698,21 @@ class ClassroomAnalyzerGUI:
             
             self.log_message("🔍 Creating analyzer instance...")
             self.update_progress(5, "Initializing analyzer...")
+            
+            # Register video in database
+            video_metadata = self.get_video_metadata(self.video_path.get())
+            video_id = self.data_manager.register_video(self.video_path.get(), video_metadata)
+            
+            if video_id is None:
+                raise Exception("Failed to register video in database")
+            
+            # Create analysis session
+            self.current_session_id = self.data_manager.create_analysis_session(
+                video_id=video_id,
+                output_dir=self.output_dir.get(),
+                headless_mode=self.headless_mode.get(),
+                models_used=[k for k, v in self.model_status.items() if v]
+            )
             
             # Create analyzer
             self.analyzer = RealtimeClassroomAnalyzer(
@@ -609,6 +752,9 @@ class ClassroomAnalyzerGUI:
             self.log_message(f"📊 Processed {len(results)} frames")
             self.log_message(f"📁 Results saved to: {self.analyzer.output_dir}")
             
+            # Save analysis results to database
+            self.save_analysis_to_database(len(results))
+            
             # Update UI
             self.root.after(0, self.analysis_complete)
             
@@ -643,6 +789,10 @@ class ClassroomAnalyzerGUI:
         self.stop_button.config(state='disabled')
         self.results_button.config(state='normal')
         self.preview_button.config(state='normal')
+        self.view_analysis_button.config(state='normal')
+        self.match_faces_button.config(state='normal')
+        self.classify_lecture_button.config(state='normal')
+        self.attendance_button.config(state='normal')
         self.status_var.set("Analysis complete")
         
     def analysis_stopped(self):
@@ -650,6 +800,10 @@ class ClassroomAnalyzerGUI:
         self.start_button.config(state='normal')
         self.stop_button.config(state='disabled')
         self.preview_button.config(state='normal')
+        self.view_analysis_button.config(state='normal')
+        self.match_faces_button.config(state='normal')
+        self.classify_lecture_button.config(state='normal')
+        self.attendance_button.config(state='normal')
         self.status_var.set("Analysis stopped")
         
     def analysis_error(self, error_msg):
@@ -658,6 +812,10 @@ class ClassroomAnalyzerGUI:
         self.start_button.config(state='normal')
         self.stop_button.config(state='disabled')
         self.preview_button.config(state='normal')
+        self.view_analysis_button.config(state='normal')
+        self.match_faces_button.config(state='normal')
+        self.classify_lecture_button.config(state='normal')
+        self.attendance_button.config(state='normal')
         self.status_var.set("Analysis failed")
         messagebox.showerror("Analysis Error", f"Analysis failed:\n{error_msg}")
         
@@ -728,6 +886,1035 @@ For support, check the documentation or contact the developer.
         text_widget.pack(fill=tk.BOTH, expand=True)
         text_widget.insert(tk.END, help_text)
         text_widget.config(state=tk.DISABLED)
+    
+    def open_analysis_viewer(self):
+        """Open the advanced analysis viewer"""
+        if not self.analyzer or not os.path.exists(self.analyzer.output_dir):
+            messagebox.showwarning("Warning", "No analysis results found! Please run analysis first.")
+            return
+        
+        try:
+            # Create analysis viewer window
+            viewer_window = tk.Toplevel(self.root)
+            viewer_window.title("📊 Advanced Analysis Viewer")
+            viewer_window.geometry("1400x900")
+            
+            # Create analysis viewer
+            self.analysis_viewer = AnalysisViewer(
+                viewer_window, 
+                analysis_dir=self.analyzer.output_dir
+            )
+            
+            self.log_message("📊 Opened advanced analysis viewer")
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to open analysis viewer: {str(e)}")
+            self.log_message(f"❌ Error opening analysis viewer: {str(e)}")
+    
+    def match_video_faces(self):
+        """Match faces from current video with existing database"""
+        if not self.analyzer or not os.path.exists(self.analyzer.output_dir):
+            messagebox.showwarning("Warning", "No analysis results found! Please run analysis first or use automated processing.")
+            return
+        
+        try:
+            self.log_message("👥 Starting face matching process...")
+            self.update_progress(10, "Loading face database...")
+            
+            # Load analysis data
+            comprehensive_file = os.path.join(self.analyzer.output_dir, "comprehensive_analysis_report.json")
+            if not os.path.exists(comprehensive_file):
+                messagebox.showerror("Error", "Comprehensive analysis file not found!")
+                return
+            
+            with open(comprehensive_file, 'r') as f:
+                analysis_data = json.load(f)
+            
+            self.update_progress(30, "Processing faces...")
+            
+            # Process faces with enhanced matcher
+            # Get video ID from the analysis data or use a default
+            video_id = "unknown"
+            if hasattr(self, 'video_path') and self.video_path.get():
+                video_id = os.path.basename(self.video_path.get())
+            elif 'video_path' in analysis_data:
+                video_id = os.path.basename(analysis_data['video_path'])
+            
+            # Debug: Check analysis_data type and content
+            print(f"🔍 Analysis data type: {type(analysis_data)}")
+            print(f"🔍 Analysis data keys: {list(analysis_data.keys()) if isinstance(analysis_data, dict) else 'Not a dict'}")
+            
+            # Check faces data specifically
+            if 'faces' in analysis_data:
+                faces_data = analysis_data['faces']
+                print(f"🔍 Faces data type: {type(faces_data)}")
+                if isinstance(faces_data, dict):
+                    print(f"🔍 Faces dict keys: {list(faces_data.keys())[:5]}...")  # Show first 5 keys
+                elif isinstance(faces_data, list):
+                    print(f"🔍 Faces list length: {len(faces_data)}")
+                else:
+                    print(f"🔍 Faces data content: {faces_data}")
+            else:
+                print("🔍 No 'faces' key found in analysis data")
+            
+            matching_results = self.enhanced_face_matcher.process_video_faces(analysis_data, video_id)
+            
+            self.update_progress(90, "Generating report...")
+            
+            # Generate attendance report
+            attendance_summary = self.enhanced_face_matcher.get_attendance_summary()
+            
+            # Generate engagement mapping by person ID
+            engagement_summary = self.enhanced_face_matcher.get_person_engagement_summary(analysis_data, video_id)
+            
+            self.update_progress(100, "Face matching complete!")
+            
+            # Debug: Print matching results structure
+            print(f"📊 Matching results type: {type(matching_results)}")
+            print(f"📊 Matching results: {matching_results}")
+            print(f"📊 Engagement summary: {engagement_summary}")
+            
+            # Show results
+            self.show_face_matching_results(matching_results, attendance_summary, engagement_summary)
+            
+            # Safely access matching results - matching_results is a boolean
+            if matching_results:
+                self.log_message("✅ Face matching completed successfully!")
+            else:
+                self.log_message("⚠️ Face matching completed with warnings")
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Face matching failed: {str(e)}")
+            self.log_message(f"❌ Face matching error: {str(e)}")
+    
+    def show_face_matching_results(self, matching_results, attendance_summary, engagement_summary=None):
+        """Show face matching results in a dialog"""
+        results_window = tk.Toplevel(self.root)
+        results_window.title("👥 Face Matching Results")
+        results_window.geometry("800x600")
+        
+        # Create scrollable frame
+        canvas = tk.Canvas(results_window)
+        scrollbar = ttk.Scrollbar(results_window, orient="vertical", command=canvas.yview)
+        scrollable_frame = ttk.Frame(canvas)
+        
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+        
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+        
+        # Results content
+        ttk.Label(scrollable_frame, text="Face Matching Results", 
+                 font=('Arial', 16, 'bold')).pack(pady=10)
+        
+        # Summary
+        summary_frame = ttk.LabelFrame(scrollable_frame, text="Summary", padding="10")
+        summary_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        # Safely access matching results
+        if isinstance(matching_results, dict):
+            matched = matching_results.get('matched', 0)
+            new = matching_results.get('new', 0)
+            total_processed = matching_results.get('total_processed', 0)
+        else:
+            matched = 0
+            new = 0
+            total_processed = 0
+        
+        summary_text = f"""
+        Total Faces Processed: {total_processed}
+        Matched Faces: {matched}
+        New Faces: {new}
+        """
+        ttk.Label(summary_frame, text=summary_text, font=('Arial', 10)).pack()
+        
+        # Engagement summary
+        if engagement_summary:
+            engagement_frame = ttk.LabelFrame(scrollable_frame, text="Engagement Analysis by Person ID", padding="10")
+            engagement_frame.pack(fill=tk.X, padx=10, pady=5)
+            
+            total_persons = engagement_summary.get('total_persons', 0)
+            avg_engagement = engagement_summary.get('average_engagement', 0.0)
+            most_engaged = engagement_summary.get('most_engaged_person', {})
+            least_engaged = engagement_summary.get('least_engaged_person', {})
+            
+            engagement_text = f"""
+            Total Unique Persons: {total_persons}
+            Average Engagement Score: {avg_engagement:.3f}
+            Most Engaged Person: {most_engaged.get('person_id', 'N/A')} (Score: {most_engaged.get('engagement_score', 0):.3f})
+            Least Engaged Person: {least_engaged.get('person_id', 'N/A')} (Score: {least_engaged.get('engagement_score', 0):.3f})
+            """
+            ttk.Label(engagement_frame, text=engagement_text, font=('Arial', 10)).pack()
+            
+            # Person details
+            person_details = engagement_summary.get('person_details', {})
+            if person_details:
+                details_text = "\nPerson Details:\n"
+                for person_id, details in person_details.items():
+                    details_text += f"Person {person_id}: Engagement={details.get('engagement_score', 0):.3f}, Frames={details.get('total_frames', 0)}, Videos={len(details.get('videos', []))}\n"
+                
+                ttk.Label(engagement_frame, text=details_text, font=('Arial', 9)).pack(anchor=tk.W)
+        
+        # Attendance summary
+        if attendance_summary:
+            attendance_frame = ttk.LabelFrame(scrollable_frame, text="Attendance Summary", padding="10")
+            attendance_frame.pack(fill=tk.X, padx=10, pady=5)
+            
+            total_people = len(attendance_summary)
+            total_appearances = sum(person.get('total_appearances', 0) for person in attendance_summary.values())
+            
+            attendance_text = f"""
+            Total People in Database: {total_people}
+            Total Appearances: {total_appearances}
+            Average Appearances per Person: {total_appearances/max(total_people, 1):.1f}
+            """
+            ttk.Label(attendance_frame, text=attendance_text, font=('Arial', 10)).pack()
+        
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+    
+    def start_auto_processing(self):
+        """Start automated video processing"""
+        try:
+            self.log_message("🚀 Starting automated video processing...")
+            
+            # Check if there are videos to process
+            today = self.auto_processor.get_today_folder()
+            videos = self.auto_processor.get_videos_for_date(today.name)
+            
+            self.log_message(f"📁 Checking folder: {today}/input")
+            self.log_message(f"🎬 Found {len(videos)} videos to process")
+            
+            if not videos:
+                messagebox.showinfo("Info", f"No videos found in {today}/input folder.\n\nPlease add videos to:\n{today}/input/")
+                self.log_message("⚠️ No videos found in input folder")
+                return
+            
+            # Confirm processing
+            result = messagebox.askyesno(
+                "Confirm Processing", 
+                f"Found {len(videos)} video(s) to process:\n\n" + 
+                "\n".join([f"• {v['name']}" for v in videos[:5]]) + 
+                (f"\n... and {len(videos)-5} more" if len(videos) > 5 else "") +
+                "\n\nStart processing?"
+            )
+            
+            if not result:
+                return
+            
+            # Start processing in background thread
+            self.auto_process_button.config(state='disabled')
+            self.stop_auto_button.config(state='normal')
+            
+            def process_thread():
+                try:
+                    self.log_message("🚀 Starting automated video processing...")
+                    
+                    # Get processing options from GUI
+                    show_footage = self.auto_show_footage.get()
+                    realtime_display = self.auto_realtime_display.get()
+                    
+                    self.log_message(f"📊 Processing options: Show footage={show_footage}, Real-time={realtime_display}")
+                    
+                    # Pass options to the processor - process all available dates
+                    self.auto_processor.process_all_available_dates(
+                        progress_callback=self.update_auto_progress,
+                        show_footage=show_footage,
+                        realtime_display=realtime_display
+                    )
+                    self.log_message("✅ Automated processing completed!")
+                    
+                    # Enable analysis buttons after processing
+                    self.enable_analysis_buttons()
+                    
+                except Exception as e:
+                    self.log_message(f"❌ Automated processing error: {e}")
+                finally:
+                    self.auto_process_button.config(state='normal')
+                    self.stop_auto_button.config(state='disabled')
+            
+            threading.Thread(target=process_thread, daemon=True).start()
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to start automated processing: {e}")
+            self.auto_process_button.config(state='normal')
+            self.stop_auto_button.config(state='disabled')
+    
+    def stop_auto_processing(self):
+        """Stop automated video processing"""
+        self.auto_processor.stop_processing()
+        self.auto_process_button.config(state='normal')
+        self.stop_auto_button.config(state='disabled')
+        self.log_message("⏹️ Automated processing stopped")
+    
+    def update_auto_progress(self, progress, message):
+        """Update progress for automated processing"""
+        self.update_progress(progress, message)
+        self.log_message(f"📊 {message} ({progress:.1f}%)")
+    
+    def show_historical_reports(self):
+        """Show historical analysis reports"""
+        try:
+            reports = self.auto_processor.get_historical_reports()
+            
+            if not reports:
+                messagebox.showinfo("No Reports", "No historical reports found.")
+                return
+            
+            # Create reports window
+            reports_window = tk.Toplevel(self.root)
+            reports_window.title("📚 Historical Analysis Reports")
+            reports_window.geometry("1000x700")
+            
+            # Create scrollable frame
+            canvas = tk.Canvas(reports_window)
+            scrollbar = ttk.Scrollbar(reports_window, orient="vertical", command=canvas.yview)
+            scrollable_frame = ttk.Frame(canvas)
+            
+            scrollable_frame.bind(
+                "<Configure>",
+                lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+            )
+            
+            canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+            canvas.configure(yscrollcommand=scrollbar.set)
+            
+            # Title
+            ttk.Label(scrollable_frame, text="Historical Analysis Reports", 
+                     font=('Arial', 16, 'bold')).pack(pady=10)
+            
+            # Summary
+            summary = self.auto_processor.get_report_summary()
+            summary_frame = ttk.LabelFrame(scrollable_frame, text="Summary", padding="10")
+            summary_frame.pack(fill=tk.X, padx=10, pady=5)
+            
+            summary_text = f"""
+            Total Videos: {summary['total_videos']}
+            Completed: {summary['completed']}
+            Failed: {summary['failed']}
+            Total Faces: {summary['total_faces']}
+            Total Students: {summary['total_students']}
+            Dates: {', '.join(summary['dates'])}
+            """
+            ttk.Label(summary_frame, text=summary_text, font=('Arial', 10)).pack()
+            
+            # Reports list
+            reports_frame = ttk.LabelFrame(scrollable_frame, text="Reports", padding="10")
+            reports_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+            
+            for i, report in enumerate(reports):
+                report_frame = ttk.Frame(reports_frame)
+                report_frame.pack(fill=tk.X, pady=2)
+                
+                # Report info
+                status_icon = "✅" if report.get('status') == 'completed' else "❌"
+                info_text = f"{status_icon} {report.get('video_name', 'Unknown')} - {report.get('date', 'Unknown')}"
+                
+                ttk.Label(report_frame, text=info_text, font=('Arial', 10, 'bold')).pack(side=tk.LEFT)
+                
+                # View button
+                view_button = ttk.Button(report_frame, text="View", 
+                                       command=lambda r=report: self.view_report(r))
+                view_button.pack(side=tk.RIGHT, padx=5)
+                
+                # Open folder button
+                folder_button = ttk.Button(report_frame, text="Open Folder", 
+                                         command=lambda r=report: self.open_report_folder(r))
+                folder_button.pack(side=tk.RIGHT, padx=5)
+            
+            canvas.pack(side="left", fill="both", expand=True)
+            scrollbar.pack(side="right", fill="y")
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to load historical reports: {e}")
+    
+    def view_report(self, report):
+        """View a specific report"""
+        try:
+            report_path = report.get('report_path')
+            if not report_path or not os.path.exists(report_path):
+                messagebox.showerror("Error", "Report file not found!")
+                return
+            
+            with open(report_path, 'r') as f:
+                report_data = json.load(f)
+            
+            # Create report viewer window
+            viewer_window = tk.Toplevel(self.root)
+            viewer_window.title(f"Report: {report.get('video_name', 'Unknown')}")
+            viewer_window.geometry("800x600")
+            
+            # Create scrollable frame
+            canvas = tk.Canvas(viewer_window)
+            scrollbar = ttk.Scrollbar(viewer_window, orient="vertical", command=canvas.yview)
+            scrollable_frame = ttk.Frame(canvas)
+            
+            scrollable_frame.bind(
+                "<Configure>",
+                lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+            )
+            
+            canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+            canvas.configure(yscrollcommand=scrollbar.set)
+            
+            # Report content
+            ttk.Label(scrollable_frame, text=f"Report: {report.get('video_name', 'Unknown')}", 
+                     font=('Arial', 14, 'bold')).pack(pady=10)
+            
+            # Report details
+            details_frame = ttk.LabelFrame(scrollable_frame, text="Report Details", padding="10")
+            details_frame.pack(fill=tk.X, padx=10, pady=5)
+            
+            details_text = f"""
+            Video: {report_data.get('video_name', 'Unknown')}
+            Status: {report_data.get('status', 'Unknown')}
+            Processed: {report_data.get('processed_at', 'Unknown')}
+            Face Count: {report_data.get('face_count', 0)}
+            Student Count: {report_data.get('student_count', 0)}
+            Processing Time: {report_data.get('processing_time', 0)}s
+            """
+            ttk.Label(details_frame, text=details_text, font=('Arial', 10)).pack()
+            
+            # Analysis summary
+            if 'analysis_summary' in report_data:
+                analysis_frame = ttk.LabelFrame(scrollable_frame, text="Analysis Summary", padding="10")
+                analysis_frame.pack(fill=tk.X, padx=10, pady=5)
+                
+                analysis_text = json.dumps(report_data['analysis_summary'], indent=2)
+                text_widget = tk.Text(analysis_frame, height=10, wrap=tk.WORD)
+                text_widget.insert(tk.END, analysis_text)
+                text_widget.config(state=tk.DISABLED)
+                text_widget.pack(fill=tk.BOTH, expand=True)
+            
+            canvas.pack(side="left", fill="both", expand=True)
+            scrollbar.pack(side="right", fill="y")
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to view report: {e}")
+    
+    def open_report_folder(self, report):
+        """Open the folder containing the report"""
+        try:
+            report_path = report.get('report_path')
+            if report_path:
+                folder_path = os.path.dirname(report_path)
+                os.startfile(folder_path)
+            else:
+                messagebox.showerror("Error", "Report path not found!")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to open folder: {e}")
+    
+    def open_video_folder(self):
+        """Open the video processing folder"""
+        try:
+            today_folder = self.auto_processor.get_today_folder()
+            input_folder = today_folder / "input"
+            input_folder.mkdir(exist_ok=True)
+            os.startfile(str(input_folder))
+            self.log_message(f"📁 Opened video folder: {input_folder}")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to open video folder: {e}")
+    
+    def enable_analysis_buttons(self):
+        """Enable analysis buttons after automated processing"""
+        try:
+            # Find the most recent analysis results
+            today = self.auto_processor.get_today_folder()
+            analysis_folder = self.auto_processor.analysis_folder / today.name
+            
+            if analysis_folder.exists():
+                # Look for the most recent analysis
+                analysis_dirs = [d for d in analysis_folder.iterdir() if d.is_dir()]
+                if analysis_dirs:
+                    # Get the most recent analysis directory
+                    latest_analysis = max(analysis_dirs, key=lambda x: x.stat().st_mtime)
+                    comprehensive_file = latest_analysis / "comprehensive_analysis_report.json"
+                    
+                    if comprehensive_file.exists():
+                        # Set the analyzer output directory
+                        self.analyzer = type('MockAnalyzer', (), {
+                            'output_dir': str(latest_analysis)
+                        })()
+                        
+                        # Enable analysis buttons
+                        self.view_analysis_button.config(state='normal')
+                        self.match_faces_button.config(state='normal')
+                        self.classify_lecture_button.config(state='normal')
+                        self.attendance_button.config(state='normal')
+                        
+                        self.log_message("✅ Analysis buttons enabled - results available!")
+                        return True
+            
+            # Also check the regular analysis_results folder
+            analysis_results_dir = Path("analysis_results")
+            if analysis_results_dir.exists():
+                comprehensive_file = analysis_results_dir / "comprehensive_analysis_report.json"
+                if comprehensive_file.exists():
+                    # Set the analyzer output directory
+                    self.analyzer = type('MockAnalyzer', (), {
+                        'output_dir': str(analysis_results_dir)
+                    })()
+                    
+                    # Enable analysis buttons
+                    self.view_analysis_button.config(state='normal')
+                    self.match_faces_button.config(state='normal')
+                    self.classify_lecture_button.config(state='normal')
+                    self.attendance_button.config(state='normal')
+                    
+                    self.log_message("✅ Analysis buttons enabled - results available!")
+                    return True
+            
+            self.log_message("⚠️ No analysis results found to enable buttons")
+            return False
+            
+        except Exception as e:
+            self.log_message(f"❌ Error enabling analysis buttons: {e}")
+            return False
+    
+    def classify_lecture_type(self):
+        """Classify the lecture type of the current video using vision LLM"""
+        # Check if we have analysis results from automated processing
+        if not self.analyzer or not os.path.exists(self.analyzer.output_dir):
+            messagebox.showwarning("Warning", "No analysis results found! Please run analysis first or use automated processing.")
+            return
+        
+        # For automated processing, we need to find the video file
+        video_file = None
+        if self.video_path.get() and os.path.exists(self.video_path.get()):
+            video_file = self.video_path.get()
+        else:
+            # Try to find video from automated processing
+            today = self.auto_processor.get_today_folder()
+            processed_folder = today / "processed"
+            if processed_folder.exists():
+                video_files = list(processed_folder.glob("*.mp4")) + list(processed_folder.glob("*.avi"))
+                if video_files:
+                    video_file = str(video_files[0])  # Use the first video found
+        
+        if not video_file:
+            messagebox.showerror("Error", "No video file found! Please select a video or use automated processing.")
+            return
+        
+        try:
+            self.log_message("🎓 Starting vision-based lecture classification...")
+            self.update_progress(10, "Extracting frame from video...")
+            
+            # Use vision classifier for frame-based classification
+            classification = self.vision_classifier.classify_video_frame(
+                video_file, 
+                frame_time=0.5  # Extract frame from middle of video
+            )
+            
+            if classification is None:
+                messagebox.showerror("Error", "Failed to classify video frame!")
+                return
+            
+            self.update_progress(100, "Classification complete!")
+            
+            # Show results
+            self.show_lecture_classification_results(classification)
+            
+            self.log_message(f"✅ Lecture classified as: {classification['lecture_type']} (confidence: {classification['confidence']:.3f})")
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Lecture classification failed: {str(e)}")
+            self.log_message(f"❌ Lecture classification error: {str(e)}")
+    
+    def show_lecture_classification_results(self, classification):
+        """Show lecture classification results"""
+        results_window = tk.Toplevel(self.root)
+        results_window.title("🎓 Lecture Classification Results")
+        results_window.geometry("600x500")
+        
+        # Main content
+        content_frame = ttk.Frame(results_window, padding="20")
+        content_frame.pack(fill=tk.BOTH, expand=True)
+        
+        # Title
+        ttk.Label(content_frame, text="Lecture Classification Results", 
+                 font=('Arial', 16, 'bold')).pack(pady=(0, 20))
+        
+        # Classification result
+        result_frame = ttk.LabelFrame(content_frame, text="Classification", padding="15")
+        result_frame.pack(fill=tk.X, pady=(0, 15))
+        
+        # Type and confidence
+        lecture_type = classification.get('lecture_type', classification.get('type', 'unknown'))
+        confidence = classification.get('confidence', 0.0)
+        method = classification.get('method', 'unknown')
+        
+        type_label = ttk.Label(result_frame, text=f"Type: {lecture_type.replace('_', ' ').title()}", 
+                              font=('Arial', 14, 'bold'))
+        type_label.pack(anchor=tk.W, pady=5)
+        
+        confidence_label = ttk.Label(result_frame, text=f"Confidence: {confidence:.3f}", 
+                                   font=('Arial', 12))
+        confidence_label.pack(anchor=tk.W, pady=5)
+        
+        method_label = ttk.Label(result_frame, text=f"Method: {method.replace('_', ' ').title()}", 
+                                font=('Arial', 12))
+        method_label.pack(anchor=tk.W, pady=5)
+        
+        # Reasoning
+        reasoning_frame = ttk.LabelFrame(content_frame, text="Reasoning", padding="15")
+        reasoning_frame.pack(fill=tk.X, pady=(0, 15))
+        
+        reasoning_text = classification.get('reasoning', 'No reasoning provided')
+        ttk.Label(reasoning_frame, text=reasoning_text, font=('Arial', 10), 
+                 wraplength=550).pack(anchor=tk.W)
+        
+        # Lecture type information
+        if 'lecture_type_info' in classification:
+            info = classification['lecture_type_info']
+            info_frame = ttk.LabelFrame(content_frame, text="Lecture Type Information", padding="15")
+            info_frame.pack(fill=tk.X, pady=(0, 15))
+            
+            if 'description' in info:
+                ttk.Label(info_frame, text=f"Description: {info['description']}", 
+                         font=('Arial', 10), wraplength=550).pack(anchor=tk.W, pady=5)
+            
+            if 'keywords' in info:
+                keywords_text = f"Keywords: {', '.join(info['keywords'])}"
+                ttk.Label(info_frame, text=keywords_text, font=('Arial', 10), 
+                         wraplength=550).pack(anchor=tk.W, pady=5)
+        
+        # All scores (if available)
+        if 'all_scores' in classification:
+            scores_frame = ttk.LabelFrame(content_frame, text="All Classification Scores", padding="15")
+            scores_frame.pack(fill=tk.X, pady=(0, 15))
+            
+            for lecture_type, score in classification['all_scores'].items():
+                score_text = f"{lecture_type.replace('_', ' ').title()}: {score:.3f}"
+                ttk.Label(scores_frame, text=score_text, font=('Arial', 10)).pack(anchor=tk.W, pady=2)
+        
+        # Close button
+        ttk.Button(content_frame, text="Close", 
+                  command=results_window.destroy).pack(pady=(20, 0))
+    
+    def generate_attendance_report(self):
+        """Generate comprehensive attendance report"""
+        try:
+            self.log_message("📋 Generating attendance report...")
+            self.update_progress(10, "Loading attendance data...")
+            
+            # Generate report using enhanced face matcher
+            attendance_summary = self.enhanced_face_matcher.get_attendance_summary()
+            
+            # Create comprehensive attendance report
+            attendance_report = {
+                'summary': {
+                    'total_persons': len(attendance_summary),
+                    'total_videos_processed': len(set([video for person_data in attendance_summary.values() for video in person_data.get('videos', [])])),
+                    'total_appearances': sum([person_data.get('total_appearances', 0) for person_data in attendance_summary.values()])
+                },
+                'persons': attendance_summary,
+                'generated_at': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
+            
+            self.update_progress(100, "Report generated!")
+            
+            # Show report
+            self.show_attendance_report(attendance_report)
+            
+            self.log_message("✅ Attendance report generated successfully")
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to generate attendance report: {str(e)}")
+            self.log_message(f"❌ Attendance report error: {str(e)}")
+    
+    def show_attendance_report(self, report):
+        """Show attendance report in a detailed window"""
+        report_window = tk.Toplevel(self.root)
+        report_window.title("📋 Comprehensive Attendance Report")
+        report_window.geometry("1400x800")
+        
+        # Create notebook for different report sections
+        notebook = ttk.Notebook(report_window)
+        notebook.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # Summary tab
+        summary_frame = ttk.Frame(notebook)
+        notebook.add(summary_frame, text="📊 Summary & KPIs")
+        
+        # Create scrollable frame for summary
+        summary_canvas = tk.Canvas(summary_frame)
+        summary_scrollbar = ttk.Scrollbar(summary_frame, orient="vertical", command=summary_canvas.yview)
+        summary_scrollable_frame = ttk.Frame(summary_canvas)
+        
+        summary_scrollable_frame.bind(
+            "<Configure>",
+            lambda e: summary_canvas.configure(scrollregion=summary_canvas.bbox("all"))
+        )
+        
+        summary_canvas.create_window((0, 0), window=summary_scrollable_frame, anchor="nw")
+        summary_canvas.configure(yscrollcommand=summary_scrollbar.set)
+        
+        # Summary statistics
+        summary_stats_frame = ttk.LabelFrame(summary_scrollable_frame, text="📈 Overall Statistics", padding="15")
+        summary_stats_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        total_persons = report['summary']['total_persons']
+        total_videos = report['summary']['total_videos_processed']
+        total_appearances = report['summary']['total_appearances']
+        avg_appearances = total_appearances / max(total_persons, 1)
+        
+        summary_text = f"""
+        👥 Total Students: {total_persons}
+        🎬 Videos Processed: {total_videos}
+        📊 Total Appearances: {total_appearances}
+        📈 Average Appearances per Student: {avg_appearances:.1f}
+        📅 Report Generated: {report['generated_at']}
+        """
+        
+        ttk.Label(summary_stats_frame, text=summary_text, font=('Arial', 12)).pack()
+        
+        # KPI Analysis
+        kpi_frame = ttk.LabelFrame(summary_scrollable_frame, text="🎯 Key Performance Indicators", padding="15")
+        kpi_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        # Calculate KPIs
+        if total_persons > 0:
+            attendance_rate = (total_persons / max(total_videos, 1)) * 100
+            engagement_score = min(avg_appearances / 10 * 100, 100)  # Normalize to 0-100
+            
+            kpi_text = f"""
+            📊 Attendance Rate: {attendance_rate:.1f}%
+            🎯 Engagement Score: {engagement_score:.1f}/100
+            📈 Most Active Student: {max(report['persons'].items(), key=lambda x: x[1].get('total_appearances', 0))[0] if report['persons'] else 'N/A'}
+            📉 Least Active Student: {min(report['persons'].items(), key=lambda x: x[1].get('total_appearances', 0))[0] if report['persons'] else 'N/A'}
+            """
+        else:
+            kpi_text = "No attendance data available"
+        
+        ttk.Label(kpi_frame, text=kpi_text, font=('Arial', 12)).pack()
+        
+        summary_canvas.pack(side="left", fill="both", expand=True)
+        summary_scrollbar.pack(side="right", fill="y")
+        
+        # Detailed records tab
+        records_frame = ttk.Frame(notebook)
+        notebook.add(records_frame, text="👥 Student Details")
+        
+        # Create scrollable frame for records
+        canvas = tk.Canvas(records_frame)
+        scrollbar = ttk.Scrollbar(records_frame, orient="vertical", command=canvas.yview)
+        scrollable_frame = ttk.Frame(canvas)
+        
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+        
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+        
+        # Add detailed student records
+        if report['persons']:
+            for person_id, person_data in report['persons'].items():
+                person_frame = ttk.LabelFrame(scrollable_frame, text=f"👤 Student: {person_id}", padding="15")
+                person_frame.pack(fill=tk.X, padx=10, pady=5)
+                
+                # Student information
+                total_appearances = person_data.get('total_appearances', 0)
+                videos = person_data.get('videos', [])
+                first_seen = person_data.get('first_seen', 'Unknown')
+                last_seen = person_data.get('last_seen', 'Unknown')
+                
+                # Calculate attendance metrics
+                unique_videos = len(set(videos)) if videos else 0
+                attendance_rate = (unique_videos / max(total_videos, 1)) * 100 if total_videos > 0 else 0
+                
+                person_text = f"""
+                📊 Total Appearances: {total_appearances}
+                🎬 Videos Attended: {unique_videos}
+                📈 Attendance Rate: {attendance_rate:.1f}%
+                📅 First Seen: {first_seen}
+                📅 Last Seen: {last_seen}
+                🎯 Videos: {', '.join(set(videos)) if videos else 'None'}
+                """
+                
+                ttk.Label(person_frame, text=person_text, font=('Arial', 11)).pack(anchor=tk.W)
+                
+                # Add face matching details if available
+                if hasattr(self.enhanced_face_matcher, 'face_database') and person_id in self.enhanced_face_matcher.face_database:
+                    face_data = self.enhanced_face_matcher.face_database[person_id]
+                    encodings_count = len(face_data.get('encodings', []))
+                    features_count = len(face_data.get('image_features', []))
+                    images_count = len(face_data.get('images', []))
+                    
+                    face_details = f"""
+                    🔍 Face Matching Details:
+                    • Face Encodings: {encodings_count}
+                    • Image Features: {features_count}
+                    • Stored Images: {images_count}
+                    """
+                    
+                    ttk.Label(person_frame, text=face_details, font=('Arial', 10), foreground='blue').pack(anchor=tk.W)
+        else:
+            no_data_frame = ttk.LabelFrame(scrollable_frame, text="No Data", padding="15")
+            no_data_frame.pack(fill=tk.X, padx=10, pady=5)
+            ttk.Label(no_data_frame, text="No attendance data available. Process some videos first!", 
+                     font=('Arial', 12), foreground='red').pack()
+        
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+        
+        # Face Matching Analysis tab
+        analysis_frame = ttk.Frame(notebook)
+        notebook.add(analysis_frame, text="🔍 Face Matching Analysis")
+        
+        # Create scrollable frame for analysis
+        analysis_canvas = tk.Canvas(analysis_frame)
+        analysis_scrollbar = ttk.Scrollbar(analysis_frame, orient="vertical", command=analysis_canvas.yview)
+        analysis_scrollable_frame = ttk.Frame(analysis_canvas)
+        
+        analysis_scrollable_frame.bind(
+            "<Configure>",
+            lambda e: analysis_canvas.configure(scrollregion=analysis_canvas.bbox("all"))
+        )
+        
+        analysis_canvas.create_window((0, 0), window=analysis_scrollable_frame, anchor="nw")
+        analysis_canvas.configure(yscrollcommand=analysis_scrollbar.set)
+        
+        # Face matching statistics
+        if hasattr(self.enhanced_face_matcher, 'face_database'):
+            face_db = self.enhanced_face_matcher.face_database
+            total_encodings = sum(len(person_data.get('encodings', [])) for person_data in face_db.values())
+            total_features = sum(len(person_data.get('image_features', [])) for person_data in face_db.values())
+            total_images = sum(len(person_data.get('images', [])) for person_data in face_db.values())
+            
+            stats_text = f"""
+            📊 Face Database Statistics:
+            
+            👥 Total Students: {len(face_db)}
+            🔍 Total Face Encodings: {total_encodings}
+            🖼️ Total Image Features: {total_features}
+            📸 Total Stored Images: {total_images}
+            
+            🎯 Matching Methods Used:
+            • Face Recognition: Primary method
+            • Image Similarity: Fallback method
+            
+            📅 Last Updated: {report['generated_at']}
+            """
+        else:
+            stats_text = "Face database not available"
+        
+        stats_frame = ttk.LabelFrame(analysis_scrollable_frame, text="Database Statistics", padding="15")
+        stats_frame.pack(fill=tk.X, padx=10, pady=5)
+        ttk.Label(stats_frame, text=stats_text, font=('Arial', 12)).pack()
+        
+        analysis_canvas.pack(side="left", fill="both", expand=True)
+        analysis_scrollbar.pack(side="right", fill="y")
+    
+    def sync_to_firebase(self):
+        """Sync today's data to Firebase"""
+        try:
+            self.log_message("☁️ Starting Firebase sync...")
+            self.update_progress(10, "Preparing data for sync...")
+            
+            # Sync today's data
+            success = self.firebase_sync.sync_daily_data()
+            
+            if success:
+                self.update_progress(100, "Firebase sync completed!")
+                self.log_message("✅ Data synced to Firebase successfully!")
+                messagebox.showinfo("Success", "Data has been synced to Firebase successfully!")
+            else:
+                self.log_message("⚠️ Firebase sync failed. Data saved locally as backup.")
+                messagebox.showwarning("Warning", "Firebase sync failed. Data has been saved locally as backup.")
+            
+        except Exception as e:
+            self.log_message(f"❌ Firebase sync error: {str(e)}")
+            messagebox.showerror("Error", f"Firebase sync failed: {str(e)}")
+    
+    def auto_detect_videos(self):
+        """Automatically detect and process videos in all date folders"""
+        try:
+            from datetime import date
+            print("🔍 Auto-detecting videos in all date folders...")
+            
+            # Get all available date folders
+            available_dates = self.auto_processor.get_available_dates()
+            
+            if not available_dates:
+                print("📁 No date folders found")
+                return
+            
+            print(f"📅 Found {len(available_dates)} date folder(s): {available_dates}")
+            
+            # Check each date folder for unprocessed videos
+            total_videos_to_process = 0
+            videos_by_date = {}
+            
+            for date_str in available_dates:
+                videos = self.auto_processor.get_videos_for_date(date_str)
+                processed_videos = self.auto_processor.get_processed_videos(date_str)
+                processed_names = {p['video_name'] for p in processed_videos}
+                
+                # Filter out already processed videos
+                unprocessed_videos = [v for v in videos if v['name'] not in processed_names]
+                
+                if unprocessed_videos:
+                    videos_by_date[date_str] = unprocessed_videos
+                    total_videos_to_process += len(unprocessed_videos)
+                    print(f"📹 {date_str}: {len(unprocessed_videos)} unprocessed video(s)")
+                else:
+                    print(f"✅ {date_str}: All videos already processed")
+            
+            if total_videos_to_process == 0:
+                print("📁 No unprocessed videos found in any date folder")
+                return
+            
+            print(f"🚀 Found {total_videos_to_process} unprocessed video(s) across {len(videos_by_date)} date folder(s)")
+            
+            # Start auto-processing in background thread
+            def auto_process_thread():
+                try:
+                    total_processed = 0
+                    total_failed = 0
+                    
+                    for date_str, videos in videos_by_date.items():
+                        print(f"\n📅 Processing videos for {date_str}...")
+                        
+                        for video in videos:
+                            try:
+                                print(f"🎬 Processing: {video['name']}")
+                                
+                                # Process individual video
+                                from pathlib import Path
+                                output_dir = self.auto_processor.analysis_folder / date_str / Path(video['name']).stem
+                                output_dir.mkdir(parents=True, exist_ok=True)
+                                
+                                # Get auto-processing preferences with defaults
+                                show_footage = getattr(self, 'auto_show_footage', tk.BooleanVar(value=False)).get()
+                                realtime_display = getattr(self, 'auto_realtime_display', tk.BooleanVar(value=True)).get()
+                                
+                                success = self.auto_processor.process_video(
+                                    video['path'], 
+                                    str(output_dir), 
+                                    video['name'],
+                                    show_footage,
+                                    realtime_display
+                                )
+                                
+                                if success:
+                                    total_processed += 1
+                                    print(f"✅ Processed: {video['name']}")
+                                else:
+                                    total_failed += 1
+                                    print(f"❌ Failed: {video['name']}")
+                                    
+                            except Exception as e:
+                                total_failed += 1
+                                print(f"❌ Error processing {video['name']}: {e}")
+                    
+                    print(f"\n📊 Auto-processing completed!")
+                    print(f"✅ Successfully processed: {total_processed} videos")
+                    print(f"❌ Failed: {total_failed} videos")
+                    
+                    if total_processed > 0:
+                        # Enable analysis buttons after auto-processing
+                        self.root.after(0, self.enable_analysis_buttons)
+                        
+                except Exception as e:
+                    print(f"❌ Auto-processing error: {e}")
+            
+            # Start background thread
+            import threading
+            thread = threading.Thread(target=auto_process_thread, daemon=True)
+            thread.start()
+            
+        except Exception as e:
+            print(f"❌ Error in auto-detect: {e}")
+    
+    def sync_all_historical_data(self):
+        """Sync all historical data to Firebase"""
+        try:
+            self.log_message("📊 Starting historical data sync...")
+            self.update_progress(10, "Collecting historical data...")
+            
+            # Confirm sync
+            result = messagebox.askyesno(
+                "Confirm Sync", 
+                "This will sync ALL historical data to Firebase. This may take some time.\n\nContinue?"
+            )
+            
+            if not result:
+                return
+            
+            # Sync all historical data
+            success = self.firebase_sync.sync_all_historical_data()
+            
+            if success:
+                self.update_progress(100, "Historical sync completed!")
+                self.log_message("✅ All historical data synced to Firebase!")
+                messagebox.showinfo("Success", "All historical data has been synced to Firebase!")
+            else:
+                self.log_message("⚠️ Historical sync failed. Check logs for details.")
+                messagebox.showwarning("Warning", "Historical sync failed. Check logs for details.")
+            
+        except Exception as e:
+            self.log_message(f"❌ Historical sync error: {str(e)}")
+            messagebox.showerror("Error", f"Historical sync failed: {str(e)}")
+    
+    def get_video_metadata(self, video_path):
+        """Get video metadata for database storage"""
+        try:
+            import cv2
+            cap = cv2.VideoCapture(video_path)
+            if cap.isOpened():
+                fps = cap.get(cv2.CAP_PROP_FPS)
+                frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+                width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+                height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                duration = frame_count / fps if fps > 0 else 0
+                
+                cap.release()
+                
+                return {
+                    'duration': duration,
+                    'fps': fps,
+                    'resolution': f"{width}x{height}",
+                    'frame_count': frame_count
+                }
+        except Exception as e:
+            self.log_message(f"⚠️ Could not get video metadata: {e}")
+        
+        return {}
+    
+    def save_analysis_to_database(self, total_frames):
+        """Save analysis results to database"""
+        try:
+            if not self.current_session_id:
+                self.log_message("⚠️ No current session ID for database storage")
+                return
+            
+            # Load comprehensive analysis data
+            comprehensive_file = os.path.join(self.analyzer.output_dir, "comprehensive_analysis_report.json")
+            if os.path.exists(comprehensive_file):
+                with open(comprehensive_file, 'r') as f:
+                    analysis_data = json.load(f)
+                
+                # Update session with results
+                self.data_manager.update_analysis_session(
+                    self.current_session_id,
+                    total_frames=total_frames,
+                    status='completed'
+                )
+                
+                # Save analysis results
+                self.data_manager.save_analysis_results(self.current_session_id, analysis_data)
+                
+                self.log_message("💾 Analysis results saved to database")
+            else:
+                self.log_message("⚠️ Comprehensive analysis file not found")
+                
+        except Exception as e:
+            self.log_message(f"❌ Error saving to database: {str(e)}")
 
 def main():
     """Main function to run the GUI application"""
@@ -735,7 +1922,8 @@ def main():
     
     # Set window properties before creating the app
     root.title("🎓 Classroom Video Analyzer")
-    root.geometry("1200x900")
+    root.geometry("1400x1200")
+    root.minsize(1300, 900)
     root.configure(bg='#f0f0f0')
     
     # Try to set icon immediately

@@ -269,9 +269,14 @@ class RealtimeClassroomAnalyzer:
         labels_path = "classroom_labels.json"
         try:
             with open(labels_path, 'r') as f:
-                return json.load(f)
+                schema = json.load(f)
+                print(f"✅ Loaded classroom schema with {len(schema)} objects")
+                return schema
         except FileNotFoundError:
-            print("⚠️ Using default schema")
+            print("⚠️ classroom_labels.json not found, using default schema")
+            return [{"name": "person", "id": 1, "attributes": []}]
+        except Exception as e:
+            print(f"❌ Error loading classroom schema: {e}")
             return [{"name": "person", "id": 1, "attributes": []}]
     
     def load_models(self):
@@ -785,29 +790,85 @@ class RealtimeClassroomAnalyzer:
             print(f"❌ Failed to save face metadata: {e}")
     
     def analyze_pose(self, keypoints):
-        """Analyze pose for activity inference"""
+        """Enhanced pose analysis for activity inference"""
         if len(keypoints) < 17:
-            return {'activity': 'unknown', 'posture': 'sitting'}
+            return {'activity': 'unknown', 'posture': 'sitting', 'confidence': 0.0}
         
-        # Key points
-        left_wrist = keypoints[9][:2] if len(keypoints[9]) >= 2 else [0, 0]
-        right_wrist = keypoints[10][:2] if len(keypoints[10]) >= 2 else [0, 0]
-        left_shoulder = keypoints[5][:2] if len(keypoints[5]) >= 2 else [0, 0]
-        right_shoulder = keypoints[6][:2] if len(keypoints[6]) >= 2 else [0, 0]
+        # Key points with confidence checking
+        def get_keypoint(keypoint_idx):
+            if keypoint_idx < len(keypoints) and len(keypoints[keypoint_idx]) >= 3:
+                x, y, conf = keypoints[keypoint_idx][:3]
+                return [x, y] if conf > 0.3 else [0, 0]  # Only use if confidence > 0.3
+            return [0, 0]
+        
+        # Get key points
+        left_wrist = get_keypoint(9)
+        right_wrist = get_keypoint(10)
+        left_shoulder = get_keypoint(5)
+        right_shoulder = get_keypoint(6)
+        left_elbow = get_keypoint(7)
+        right_elbow = get_keypoint(8)
+        nose = get_keypoint(0)
+        left_eye = get_keypoint(1)
+        right_eye = get_keypoint(2)
         
         activity = 'listening'
         posture = 'sitting'
+        confidence = 0.5
         
-        # Check for raised hand
-        if (left_wrist[1] > 0 and left_shoulder[1] > 0 and left_wrist[1] < left_shoulder[1]) or \
-           (right_wrist[1] > 0 and right_shoulder[1] > 0 and right_wrist[1] < right_shoulder[1]):
+        # Check if we have valid keypoints
+        valid_keypoints = sum(1 for kp in [left_wrist, right_wrist, left_shoulder, right_shoulder] 
+                            if kp[0] > 0 and kp[1] > 0)
+        
+        if valid_keypoints < 2:
+            return {'activity': 'unknown', 'posture': 'sitting', 'confidence': 0.0}
+        
+        # Enhanced activity detection
+        
+        # 1. Check for raised hand (more robust)
+        left_hand_raised = (left_wrist[1] > 0 and left_shoulder[1] > 0 and 
+                           left_wrist[1] < left_shoulder[1] - 20)  # More strict threshold
+        right_hand_raised = (right_wrist[1] > 0 and right_shoulder[1] > 0 and 
+                            right_wrist[1] < right_shoulder[1] - 20)
+        
+        if left_hand_raised or right_hand_raised:
             activity = 'raising_hand'
+            confidence = 0.9
         
-        # Check for writing position
-        elif abs(left_wrist[0] - left_shoulder[0]) < 30 or abs(right_wrist[0] - right_shoulder[0]) < 30:
+        # 2. Check for writing position (enhanced)
+        elif (left_wrist[0] > 0 and left_shoulder[0] > 0 and 
+              abs(left_wrist[0] - left_shoulder[0]) < 50 and
+              left_wrist[1] > left_shoulder[1]) or \
+             (right_wrist[0] > 0 and right_shoulder[0] > 0 and 
+              abs(right_wrist[0] - right_shoulder[0]) < 50 and
+              right_wrist[1] > right_shoulder[1]):
             activity = 'writing'
+            confidence = 0.8
         
-        return {'activity': activity, 'posture': posture}
+        # 3. Check for listening (head orientation and posture)
+        elif (nose[0] > 0 and left_eye[0] > 0 and right_eye[0] > 0):
+            # Check if person is looking forward (listening)
+            head_orientation = abs(left_eye[0] - right_eye[0])
+            if head_orientation > 10:  # Eyes are reasonably spaced
+                activity = 'listening'
+                confidence = 0.7
+            else:
+                activity = 'listening'  # Default to listening
+                confidence = 0.5
+        else:
+            # Default to listening if we can't determine
+            activity = 'listening'
+            confidence = 0.4
+        
+        # Posture detection
+        if (left_shoulder[1] > 0 and right_shoulder[1] > 0 and 
+            abs(left_shoulder[1] - right_shoulder[1]) < 20):
+            # Shoulders are level, likely sitting
+            posture = 'sitting'
+        else:
+            posture = 'sitting'  # Default to sitting
+        
+        return {'activity': activity, 'posture': posture, 'confidence': confidence}
     
     def create_annotations(self, persons, pose_data, height, width):
         """Create classroom label annotations"""
@@ -831,8 +892,69 @@ class RealtimeClassroomAnalyzer:
                 break
         
         if not person_schema:
-            return annotations
-        
+            print("⚠️ No person schema found, using default attributes")
+            # Create a fallback person schema that matches classroom_labels.json
+            person_schema = {
+                "name": "person",
+                "id": 1,
+                "color": "#ff0000",
+                "type": "rectangle",
+                "attributes": [
+                    {
+                        "name": "activity",
+                        "input_type": "select",
+                        "mutable": True,
+                        "values": [
+                            "writing",
+                            "listening",
+                            "talking",
+                            "using_phone",
+                            "sleeping",
+                            "raising_hand",
+                            "walking",
+                            "distracted",
+                            "reading",
+                            "eating",
+                            "unknown"
+                        ],
+                        "default_value": "unknown"
+                    },
+                    {
+                        "name": "posture",
+                        "input_type": "select",
+                        "mutable": True,
+                        "values": [
+                            "sitting",
+                            "standing",
+                            "leaning",
+                            "slouching"
+                        ],
+                        "default_value": "sitting"
+                    },
+                    {
+                        "name": "attention_level",
+                        "input_type": "select",
+                        "mutable": True,
+                        "values": [
+                            "focused",
+                            "partially_focused",
+                            "distracted",
+                            "not_visible"
+                        ],
+                        "default_value": "not_visible"
+                    },
+                    {
+                        "name": "engagement",
+                        "input_type": "checkbox",
+                        "mutable": True,
+                        "values": [
+                            "engaged"
+                        ],
+                        "default_value": ""
+                    }
+                ]
+            }
+
         for i, person in enumerate(persons):
             # Base annotation
             annotation = {
@@ -895,30 +1017,50 @@ class RealtimeClassroomAnalyzer:
                     annotation['attributes'][attr_name] = attention
                 
                 elif attr_name == 'engagement':
-                    if pose_analysis['activity'] in ['raising_hand', 'writing']:
+                    # Enhanced engagement calculation based on pose analysis
+                    activity = pose_analysis.get('activity', 'unknown')
+                    posture = pose_analysis.get('posture', 'sitting')
+                    confidence = pose_analysis.get('confidence', 0.0)
+                    
+                    # Direct engagement indicators
+                    if activity in ['raising_hand', 'writing']:
+                        engagement = 'engaged'
+                    elif activity == 'listening' and posture in ['sitting', 'standing'] and confidence > 0.5:
+                        # Listening with good posture and high confidence indicates engagement
                         engagement = 'engaged'
                     else:
-                        try:
-                            # Use random for engagement calculation
-                            rand_val = random.random()
-                            if rand_val < engagement_prob:
-                                engagement = 'engaged'
-                            else:
-                                engagement = 'not_engaged'
-                        except Exception as e:
-                            # Fallback if random fails in executable
-                            print(f"⚠️ Random module error in executable: {e}")
-                            # Use deterministic fallback based on position
-                            if engagement_prob > 0.7:
-                                engagement = 'engaged'
-                            else:
-                                engagement = 'not_engaged'
+                        # Use deterministic calculation based on multiple factors
+                        engagement_score = 0.0
+                        
+                        # Activity-based scoring
+                        if activity == 'listening':
+                            engagement_score += 0.6 * confidence  # Weight by confidence
+                        elif activity == 'writing':
+                            engagement_score += 0.9
+                        elif activity == 'raising_hand':
+                            engagement_score += 1.0
+                        elif activity == 'unknown':
+                            engagement_score += 0.3
+                        
+                        # Posture-based scoring
+                        if posture == 'sitting':
+                            engagement_score += 0.2
+                        elif posture == 'standing':
+                            engagement_score += 0.1
+                        
+                        # Position-based scoring (zone)
+                        engagement_score += engagement_prob * 0.3
+                        
+                        # Confidence-based bonus
+                        engagement_score += confidence * 0.2
+                        
+                        # Determine engagement based on total score
+                        if engagement_score >= 0.6:
+                            engagement = 'engaged'
+                        else:
+                            engagement = 'not_engaged'
                     
                     annotation['attributes'][attr_name] = engagement
-                    
-                    # Debug logging for engagement calculation
-                    if i == 0:  # Only log for first person to avoid spam
-                        print(f"🔍 Person {i}: activity={pose_analysis['activity']}, engagement_prob={engagement_prob:.2f}, engagement={engagement}")
             
             # Update frame stats
             activity = annotation['attributes'].get('activity', 'unknown')

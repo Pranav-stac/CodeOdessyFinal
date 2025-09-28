@@ -1,0 +1,16 @@
+{
+  "face_id": 95,
+  "image_filename": "face_95_best.jpg",
+  "frame_number": 206,
+  "bbox": [
+    743,
+    295,
+    766,
+    322
+  ],
+  "confidence": 0.6533254981040955,
+  "quality_score": 0.6456045237919643,
+  "combined_score": 0.6510092058104561,
+  "timestamp": 1759025797.8084464,
+  "is_best_image": true
+}

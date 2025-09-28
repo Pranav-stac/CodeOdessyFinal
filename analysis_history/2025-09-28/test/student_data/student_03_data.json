@@ -1,0 +1,25 @@
+{
+  "student_id": "student_03",
+  "tracking_info": {
+    "total_appearances": 256,
+    "first_seen_frame": 0,
+    "last_seen_frame": 249,
+    "position_zone": "middle"
+  },
+  "behavior_analysis": {
+    "dominant_activity": "listening",
+    "activity_distribution": {
+      "writing": 92,
+      "listening": 137,
+      "unknown": 7,
+      "raising_hand": 20
+    },
+    "engagement_rate": "100.0%",
+    "attention_distribution": {
+      "focused": 112,
+      "distracted": 85,
+      "partially_focused": 59
+    }
+  },
+  "face_data": null
+}
