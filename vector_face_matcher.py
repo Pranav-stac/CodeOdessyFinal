@@ -212,6 +212,9 @@ class VectorFaceMatcher:
                     print(f"⚠️ Skipping invalid face data: {type(face_data)}")
                     continue
                 
+                # Debug: Print face_data type and content
+                print(f"🔍 face_data type: {type(face_data)}, keys: {list(face_data.keys()) if isinstance(face_data, dict) else 'N/A'}")
+                
                 # Get face information
                 person_id = face_data.get('person_id', face_data.get('face_id', 'unknown'))
                 face_image = face_data.get('face_image')
@@ -281,8 +284,13 @@ class VectorFaceMatcher:
             }
             
             for person_id, person_data in self.face_database.items():
-                videos = list(person_data['videos'])
-                appearances = len(person_data['embeddings'])
+                # Debug: Check if person_data is a dictionary
+                if not isinstance(person_data, dict):
+                    print(f"⚠️ Invalid person_data type for {person_id}: {type(person_data)}")
+                    continue
+                
+                videos = list(person_data.get('videos', []))
+                appearances = len(person_data.get('embeddings', []))
                 
                 summary['total_videos'].update(videos)
                 summary['total_appearances'] += appearances
@@ -292,8 +300,8 @@ class VectorFaceMatcher:
                     'total_appearances': appearances,
                     'videos_attended': videos,
                     'attendance_rate': len(videos) / max(len(summary['total_videos']), 1),
-                    'first_seen': min(person_data['frame_numbers']) if person_data['frame_numbers'] else 0,
-                    'last_seen': max(person_data['frame_numbers']) if person_data['frame_numbers'] else 0
+                    'first_seen': min(person_data.get('frame_numbers', [])) if person_data.get('frame_numbers') else 0,
+                    'last_seen': max(person_data.get('frame_numbers', [])) if person_data.get('frame_numbers') else 0
                 }
                 
                 summary['persons'].append(person_info)
@@ -329,7 +337,11 @@ class VectorFaceMatcher:
             
             for face_data in faces_list:
                 if not isinstance(face_data, dict):
+                    print(f"⚠️ Skipping invalid face_data in mapping: {type(face_data)}")
                     continue
+                
+                # Debug: Print face_data type and content
+                print(f"🔍 Mapping face_data type: {type(face_data)}, keys: {list(face_data.keys()) if isinstance(face_data, dict) else 'N/A'}")
                 
                 face_id = face_data.get('face_id', face_data.get('person_id', 'unknown'))
                 face_image = face_data.get('face_image')
@@ -364,6 +376,11 @@ class VectorFaceMatcher:
             students_data = video_analysis_data.get('students', {})
             
             for student_id, student_data in students_data.items():
+                # Skip if student_data is not a dictionary
+                if not isinstance(student_data, dict):
+                    print(f"⚠️ Skipping invalid student data for {student_id}: {type(student_data)}")
+                    continue
+                
                 # Find corresponding person ID
                 person_id = person_mapping.get(student_id, student_id)
                 
@@ -378,26 +395,38 @@ class VectorFaceMatcher:
                         'videos': set()
                     }
                 
+                # Extract data from the comprehensive report structure
+                tracking_summary = student_data.get('tracking_summary', {})
+                behavior_summary = student_data.get('behavior_summary', {})
+                
                 # Aggregate engagement data
-                engagement_by_person[person_id]['total_frames'] += student_data.get('total_frames', 0)
-                engagement_by_person[person_id]['engagement_score'] += student_data.get('engagement_score', 0.0)
+                total_appearances = tracking_summary.get('total_appearances', 0)
+                engagement_by_person[person_id]['total_frames'] += total_appearances
+                
+                # Calculate engagement score from engagement_rate
+                engagement_rate_str = behavior_summary.get('engagement_rate', '0%')
+                try:
+                    engagement_rate = float(engagement_rate_str.replace('%', '')) / 100.0
+                    engagement_by_person[person_id]['engagement_score'] += engagement_rate
+                except (ValueError, AttributeError):
+                    engagement_by_person[person_id]['engagement_score'] += 0.0
+                
                 engagement_by_person[person_id]['face_detections'] += 1
                 engagement_by_person[person_id]['videos'].add(video_id)
                 
                 # Aggregate activity breakdown
-                activity_breakdown = student_data.get('activity_breakdown', {})
-                for activity, count in activity_breakdown.items():
+                activity_distribution = behavior_summary.get('activity_distribution', {})
+                for activity, count in activity_distribution.items():
                     if activity not in engagement_by_person[person_id]['activity_breakdown']:
                         engagement_by_person[person_id]['activity_breakdown'][activity] = 0
                     engagement_by_person[person_id]['activity_breakdown'][activity] += count
                 
                 # Aggregate zone analysis
-                zone_analysis = student_data.get('zone_analysis', {})
-                for zone, data in zone_analysis.items():
-                    if zone not in engagement_by_person[person_id]['zone_analysis']:
-                        engagement_by_person[person_id]['zone_analysis'][zone] = {'time_spent': 0, 'engagement': 0.0}
-                    engagement_by_person[person_id]['zone_analysis'][zone]['time_spent'] += data.get('time_spent', 0)
-                    engagement_by_person[person_id]['zone_analysis'][zone]['engagement'] += data.get('engagement', 0.0)
+                position_zone = tracking_summary.get('position_zone', 'unknown')
+                if position_zone not in engagement_by_person[person_id]['zone_analysis']:
+                    engagement_by_person[person_id]['zone_analysis'][position_zone] = {'time_spent': 0, 'engagement': 0.0}
+                engagement_by_person[person_id]['zone_analysis'][position_zone]['time_spent'] += total_appearances
+                engagement_by_person[person_id]['zone_analysis'][position_zone]['engagement'] += engagement_rate
             
             # Convert sets to lists for JSON serialization
             for person_data in engagement_by_person.values():

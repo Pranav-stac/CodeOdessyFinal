@@ -2,7 +2,7 @@
   "analysis_metadata": {
     "video_path": "video_processing\\2025-09-29\\input\\test3.mp4",
     "output_directory": "analysis_history\\2025-09-29\\test3",
-    "analysis_date": "2025-09-28T09:25:56.643037",
+    "analysis_date": "2025-09-28T12:55:40.901990",
     "total_frames_processed": 250,
     "models_loaded": [
       "detection",
@@ -30,18 +30,17 @@
         "duration_in_class": "8.3 seconds"
       },
       "behavior_summary": {
-        "dominant_activity": "listening",
+        "dominant_activity": "writing",
         "activity_distribution": {
-          "listening": 193,
-          "writing": 30,
-          "raising_hand": 25,
-          "unknown": 2
+          "unknown": 65,
+          "writing": 179,
+          "listening": 3,
+          "raising_hand": 3
         },
-        "engagement_rate": "100.0%",
+        "engagement_rate": "99.2%",
         "attention_distribution": {
-          "partially_focused": 112,
-          "distracted": 83,
-          "focused": 55
+          "partially_focused": 68,
+          "focused": 182
         },
         "engagement_level": "high"
       },
@@ -68,17 +67,16 @@
       "behavior_summary": {
         "dominant_activity": "unknown",
         "activity_distribution": {
-          "writing": 60,
-          "listening": 71,
-          "unknown": 218
+          "writing": 113,
+          "listening": 2,
+          "unknown": 234
         },
-        "engagement_rate": "100.0%",
+        "engagement_rate": "56.7%",
         "attention_distribution": {
-          "focused": 60,
-          "partially_focused": 159,
-          "distracted": 130
+          "focused": 113,
+          "partially_focused": 236
         },
-        "engagement_level": "high"
+        "engagement_level": "medium"
       },
       "face_data": {
         "face_id": 54,
@@ -103,16 +101,14 @@
       "behavior_summary": {
         "dominant_activity": "unknown",
         "activity_distribution": {
-          "listening": 92,
-          "writing": 109,
-          "unknown": 366,
-          "raising_hand": 1
+          "writing": 181,
+          "unknown": 386,
+          "listening": 1
         },
         "engagement_rate": "100.0%",
         "attention_distribution": {
-          "partially_focused": 371,
-          "distracted": 87,
-          "focused": 110
+          "focused": 182,
+          "partially_focused": 386
         },
         "engagement_level": "high"
       },
@@ -137,18 +133,16 @@
         "duration_in_class": "8.5 seconds"
       },
       "behavior_summary": {
-        "dominant_activity": "listening",
+        "dominant_activity": "writing",
         "activity_distribution": {
-          "writing": 101,
-          "listening": 124,
-          "unknown": 22,
-          "raising_hand": 9
+          "writing": 220,
+          "listening": 4,
+          "unknown": 32
         },
-        "engagement_rate": "100.0%",
+        "engagement_rate": "91.4%",
         "attention_distribution": {
-          "focused": 110,
-          "partially_focused": 90,
-          "distracted": 56
+          "focused": 220,
+          "partially_focused": 36
         },
         "engagement_level": "high"
       },
@@ -175,17 +169,15 @@
       "behavior_summary": {
         "dominant_activity": "unknown",
         "activity_distribution": {
-          "listening": 13,
-          "writing": 11,
+          "writing": 24,
           "unknown": 47
         },
-        "engagement_rate": "100.0%",
+        "engagement_rate": "33.8%",
         "attention_distribution": {
-          "partially_focused": 39,
-          "focused": 11,
-          "distracted": 21
+          "focused": 24,
+          "partially_focused": 47
         },
-        "engagement_level": "high"
+        "engagement_level": "low"
       },
       "face_data": {
         "face_id": 71,
@@ -210,15 +202,13 @@
       "behavior_summary": {
         "dominant_activity": "unknown",
         "activity_distribution": {
-          "writing": 128,
-          "listening": 85,
-          "unknown": 185
+          "writing": 196,
+          "unknown": 202
         },
         "engagement_rate": "100.0%",
         "attention_distribution": {
-          "focused": 128,
-          "distracted": 46,
-          "partially_focused": 224
+          "focused": 196,
+          "partially_focused": 202
         },
         "engagement_level": "high"
       },
@@ -245,17 +235,15 @@
       "behavior_summary": {
         "dominant_activity": "unknown",
         "activity_distribution": {
-          "writing": 29,
-          "unknown": 250,
-          "listening": 11
+          "writing": 39,
+          "unknown": 251
         },
-        "engagement_rate": "100.0%",
+        "engagement_rate": "28.3%",
         "attention_distribution": {
-          "focused": 29,
-          "partially_focused": 164,
-          "distracted": 97
+          "focused": 39,
+          "partially_focused": 251
         },
-        "engagement_level": "high"
+        "engagement_level": "low"
       },
       "face_data": {
         "face_id": 8,
@@ -280,17 +268,15 @@
       "behavior_summary": {
         "dominant_activity": "unknown",
         "activity_distribution": {
-          "writing": 21,
-          "unknown": 323,
-          "listening": 15
+          "writing": 31,
+          "unknown": 328
         },
-        "engagement_rate": "100.0%",
+        "engagement_rate": "60.7%",
         "attention_distribution": {
-          "focused": 21,
-          "partially_focused": 242,
-          "distracted": 96
+          "focused": 31,
+          "partially_focused": 328
         },
-        "engagement_level": "high"
+        "engagement_level": "medium"
       },
       "face_data": {
         "face_id": 17,
@@ -315,16 +301,13 @@
       "behavior_summary": {
         "dominant_activity": "unknown",
         "activity_distribution": {
-          "writing": 81,
-          "unknown": 292,
-          "listening": 36,
-          "raising_hand": 1
+          "writing": 106,
+          "unknown": 304
         },
-        "engagement_rate": "100.0%",
+        "engagement_rate": "99.0%",
         "attention_distribution": {
-          "focused": 82,
-          "partially_focused": 259,
-          "distracted": 69
+          "focused": 106,
+          "partially_focused": 304
         },
         "engagement_level": "high"
       },
@@ -351,18 +334,15 @@
       "behavior_summary": {
         "dominant_activity": "unknown",
         "activity_distribution": {
-          "unknown": 166,
-          "listening": 32,
-          "writing": 52,
-          "raising_hand": 2
+          "unknown": 176,
+          "writing": 76
         },
-        "engagement_rate": "100.0%",
+        "engagement_rate": "34.1%",
         "attention_distribution": {
-          "partially_focused": 120,
-          "distracted": 78,
-          "focused": 54
+          "partially_focused": 176,
+          "focused": 76
         },
-        "engagement_level": "high"
+        "engagement_level": "low"
       },
       "face_data": {
         "face_id": 7,
@@ -387,17 +367,15 @@
       "behavior_summary": {
         "dominant_activity": "unknown",
         "activity_distribution": {
-          "unknown": 19,
-          "listening": 2,
-          "writing": 1
+          "unknown": 20,
+          "writing": 2
         },
-        "engagement_rate": "100.0%",
+        "engagement_rate": "54.5%",
         "attention_distribution": {
-          "partially_focused": 14,
-          "distracted": 7,
-          "focused": 1
+          "partially_focused": 20,
+          "focused": 2
         },
-        "engagement_level": "high"
+        "engagement_level": "medium"
       },
       "face_data": {
         "face_id": 17,
@@ -422,16 +400,13 @@
       "behavior_summary": {
         "dominant_activity": "unknown",
         "activity_distribution": {
-          "unknown": 141,
-          "writing": 84,
-          "listening": 38,
-          "raising_hand": 1
+          "unknown": 148,
+          "writing": 116
         },
         "engagement_rate": "100.0%",
         "attention_distribution": {
-          "partially_focused": 149,
-          "focused": 85,
-          "distracted": 30
+          "partially_focused": 148,
+          "focused": 116
         },
         "engagement_level": "high"
       },
@@ -458,15 +433,13 @@
       "behavior_summary": {
         "dominant_activity": "writing",
         "activity_distribution": {
-          "unknown": 37,
-          "listening": 45,
-          "writing": 62
+          "unknown": 42,
+          "writing": 102
         },
-        "engagement_rate": "100.0%",
+        "engagement_rate": "74.3%",
         "attention_distribution": {
-          "distracted": 38,
-          "partially_focused": 44,
-          "focused": 62
+          "partially_focused": 42,
+          "focused": 102
         },
         "engagement_level": "high"
       },
@@ -493,15 +466,13 @@
       "behavior_summary": {
         "dominant_activity": "writing",
         "activity_distribution": {
-          "unknown": 4,
-          "listening": 5,
-          "writing": 9
+          "unknown": 5,
+          "writing": 13
         },
         "engagement_rate": "100.0%",
         "attention_distribution": {
-          "partially_focused": 7,
-          "focused": 9,
-          "distracted": 2
+          "partially_focused": 5,
+          "focused": 13
         },
         "engagement_level": "high"
       },
@@ -528,15 +499,13 @@
       "behavior_summary": {
         "dominant_activity": "unknown",
         "activity_distribution": {
-          "unknown": 58,
-          "writing": 41,
-          "listening": 15
+          "unknown": 59,
+          "writing": 55
         },
-        "engagement_rate": "100.0%",
+        "engagement_rate": "89.5%",
         "attention_distribution": {
-          "partially_focused": 54,
-          "distracted": 19,
-          "focused": 41
+          "partially_focused": 59,
+          "focused": 55
         },
         "engagement_level": "high"
       },
@@ -564,14 +533,12 @@
         "dominant_activity": "unknown",
         "activity_distribution": {
           "unknown": 99,
-          "writing": 33,
-          "listening": 37
+          "writing": 70
         },
         "engagement_rate": "100.0%",
         "attention_distribution": {
-          "partially_focused": 112,
-          "distracted": 24,
-          "focused": 33
+          "partially_focused": 99,
+          "focused": 70
         },
         "engagement_level": "high"
       },
@@ -599,16 +566,14 @@
         "dominant_activity": "unknown",
         "activity_distribution": {
           "unknown": 4,
-          "listening": 1,
-          "writing": 3
+          "writing": 4
         },
-        "engagement_rate": "100.0%",
+        "engagement_rate": "50.0%",
         "attention_distribution": {
-          "distracted": 2,
-          "partially_focused": 3,
-          "focused": 3
+          "partially_focused": 4,
+          "focused": 4
         },
-        "engagement_level": "high"
+        "engagement_level": "medium"
       },
       "face_data": {
         "face_id": 8,
@@ -633,17 +598,15 @@
       "behavior_summary": {
         "dominant_activity": "writing",
         "activity_distribution": {
-          "writing": 91,
-          "unknown": 86,
-          "listening": 75
+          "writing": 147,
+          "unknown": 105
         },
-        "engagement_rate": "100.0%",
+        "engagement_rate": "65.9%",
         "attention_distribution": {
-          "focused": 91,
-          "partially_focused": 102,
-          "distracted": 59
+          "focused": 147,
+          "partially_focused": 105
         },
-        "engagement_level": "high"
+        "engagement_level": "medium"
       },
       "face_data": {
         "face_id": 14,
@@ -666,17 +629,16 @@
         "duration_in_class": "7.9 seconds"
       },
       "behavior_summary": {
-        "dominant_activity": "listening",
+        "dominant_activity": "writing",
         "activity_distribution": {
-          "unknown": 57,
-          "listening": 112,
-          "writing": 67
+          "unknown": 82,
+          "writing": 151,
+          "listening": 3
         },
-        "engagement_rate": "100.0%",
+        "engagement_rate": "75.8%",
         "attention_distribution": {
-          "partially_focused": 105,
-          "distracted": 64,
-          "focused": 67
+          "partially_focused": 85,
+          "focused": 151
         },
         "engagement_level": "high"
       },
@@ -703,17 +665,15 @@
       "behavior_summary": {
         "dominant_activity": "unknown",
         "activity_distribution": {
-          "unknown": 94,
-          "writing": 22,
-          "listening": 23
+          "unknown": 98,
+          "writing": 41
         },
-        "engagement_rate": "100.0%",
+        "engagement_rate": "32.4%",
         "attention_distribution": {
-          "partially_focused": 75,
-          "focused": 22,
-          "distracted": 42
+          "partially_focused": 98,
+          "focused": 41
         },
-        "engagement_level": "high"
+        "engagement_level": "low"
       },
       "face_data": {
         "face_id": 18,
@@ -742,8 +702,7 @@
         },
         "engagement_rate": "100.0%",
         "attention_distribution": {
-          "distracted": 10,
-          "partially_focused": 35
+          "partially_focused": 45
         },
         "engagement_level": "high"
       },
@@ -772,12 +731,11 @@
         "activity_distribution": {
           "unknown": 5
         },
-        "engagement_rate": "100.0%",
+        "engagement_rate": "0.0%",
         "attention_distribution": {
-          "distracted": 2,
-          "partially_focused": 3
+          "partially_focused": 5
         },
-        "engagement_level": "high"
+        "engagement_level": "low"
       },
       "face_data": {
         "face_id": 55,
@@ -800,18 +758,16 @@
         "duration_in_class": "3.8 seconds"
       },
       "behavior_summary": {
-        "dominant_activity": "listening",
+        "dominant_activity": "writing",
         "activity_distribution": {
-          "writing": 43,
-          "listening": 53,
-          "unknown": 17,
-          "raising_hand": 1
+          "writing": 74,
+          "listening": 3,
+          "unknown": 37
         },
         "engagement_rate": "100.0%",
         "attention_distribution": {
-          "focused": 44,
-          "partially_focused": 52,
-          "distracted": 18
+          "focused": 77,
+          "partially_focused": 37
         },
         "engagement_level": "high"
       },
@@ -842,8 +798,7 @@
         },
         "engagement_rate": "100.0%",
         "attention_distribution": {
-          "partially_focused": 58,
-          "distracted": 15
+          "partially_focused": 73
         },
         "engagement_level": "high"
       },
@@ -868,17 +823,16 @@
         "duration_in_class": "3.5 seconds"
       },
       "behavior_summary": {
-        "dominant_activity": "listening",
+        "dominant_activity": "writing",
         "activity_distribution": {
-          "raising_hand": 14,
-          "listening": 56,
-          "writing": 34
+          "raising_hand": 4,
+          "unknown": 27,
+          "writing": 73
         },
         "engagement_rate": "100.0%",
         "attention_distribution": {
-          "focused": 48,
-          "partially_focused": 41,
-          "distracted": 15
+          "focused": 77,
+          "partially_focused": 27
         },
         "engagement_level": "high"
       },
@@ -903,18 +857,15 @@
         "duration_in_class": "2.1 seconds"
       },
       "behavior_summary": {
-        "dominant_activity": "listening",
+        "dominant_activity": "writing",
         "activity_distribution": {
-          "unknown": 10,
-          "listening": 26,
-          "writing": 26,
-          "raising_hand": 2
+          "unknown": 13,
+          "writing": 51
         },
-        "engagement_rate": "100.0%",
+        "engagement_rate": "79.7%",
         "attention_distribution": {
-          "partially_focused": 19,
-          "distracted": 17,
-          "focused": 28
+          "partially_focused": 13,
+          "focused": 51
         },
         "engagement_level": "high"
       },
@@ -943,12 +894,11 @@
         "activity_distribution": {
           "unknown": 6
         },
-        "engagement_rate": "100.0%",
+        "engagement_rate": "0.0%",
         "attention_distribution": {
-          "partially_focused": 2,
-          "distracted": 4
+          "partially_focused": 6
         },
-        "engagement_level": "high"
+        "engagement_level": "low"
       },
       "face_data": {
         "face_id": 71,
@@ -2060,49 +2010,46 @@
     "overall_activity_summary": {
       "total_activity_records": 4983,
       "activity_distribution": {
-        "listening": 1160,
-        "writing": 1138,
-        "raising_hand": 56,
-        "unknown": 2629
+        "unknown": 2896,
+        "writing": 2064,
+        "listening": 16,
+        "raising_hand": 7
       },
       "attention_distribution": {
-        "partially_focused": 2658,
-        "distracted": 1131,
-        "focused": 1194
+        "partially_focused": 2908,
+        "focused": 2075
       },
       "engagement_distribution": {
-        "not_engaged": 1159,
-        "engaged": 3824
+        "partially_engaged": 1830,
+        "engaged": 2087
       },
-      "overall_engagement_rate": "100.0%"
+      "overall_engagement_rate": "78.6%"
     },
     "zone_analysis": {
       "front_zone": {
         "activity_distribution": {
-          "unknown": 1581,
-          "writing": 538,
-          "listening": 359,
-          "raising_hand": 4
+          "unknown": 1663,
+          "writing": 815,
+          "listening": 4
         },
         "engagement_rate": "100.0%"
       },
       "middle_zone": {
         "activity_distribution": {
-          "listening": 705,
-          "writing": 530,
-          "raising_hand": 50,
-          "unknown": 953
+          "unknown": 1120,
+          "writing": 1101,
+          "listening": 10,
+          "raising_hand": 7
         },
-        "engagement_rate": "100.0%"
+        "engagement_rate": "57.4%"
       },
       "back_zone": {
         "activity_distribution": {
-          "writing": 70,
-          "listening": 96,
-          "unknown": 95,
-          "raising_hand": 2
+          "writing": 148,
+          "listening": 2,
+          "unknown": 113
         },
-        "engagement_rate": "100.0%"
+        "engagement_rate": "57.0%"
       }
     }
   },
@@ -2118,21 +2065,21 @@
         "timestamp": 0.0,
         "students_detected": 18,
         "faces_detected": 31,
-        "engagement_count": 16
+        "engagement_count": 8
       },
       {
         "frame_number": 100,
         "timestamp": 4.0,
         "students_detected": 19,
         "faces_detected": 29,
-        "engagement_count": 17
+        "engagement_count": 9
       },
       {
         "frame_number": 200,
         "timestamp": 8.0,
         "students_detected": 20,
         "faces_detected": 34,
-        "engagement_count": 15
+        "engagement_count": 8
       }
     ]
   },
@@ -2294,12 +2241,12 @@
     "middle_zone": {
       "description": "40%-70% of classroom",
       "student_count": 14,
-      "engagement_rate": "100.0%"
+      "engagement_rate": "57.4%"
     },
     "back_zone": {
       "description": "Bottom 30% of classroom",
       "student_count": 3,
-      "engagement_rate": "100.0%"
+      "engagement_rate": "57.0%"
     }
   },
   "lecture_classification": {
@@ -2308,6 +2255,6 @@
     "method": "lightweight_vision",
     "frame_time": 0.5,
     "video_path": "video_processing\\2025-09-29\\input\\test3.mp4",
-    "timestamp": "2025-09-28T09:25:57.851209"
+    "timestamp": "2025-09-28T12:55:45.923591"
   }
 }

@@ -13,8 +13,7 @@
     },
     "engagement_rate": "100.0%",
     "attention_distribution": {
-      "distracted": 10,
-      "partially_focused": 35
+      "partially_focused": 45
     }
   },
   "face_data": {

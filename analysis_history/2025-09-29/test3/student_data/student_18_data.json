@@ -10,14 +10,12 @@
     "dominant_activity": "unknown",
     "activity_distribution": {
       "unknown": 4,
-      "listening": 1,
-      "writing": 3
+      "writing": 4
     },
-    "engagement_rate": "100.0%",
+    "engagement_rate": "50.0%",
     "attention_distribution": {
-      "distracted": 2,
-      "partially_focused": 3,
-      "focused": 3
+      "partially_focused": 4,
+      "focused": 4
     }
   },
   "face_data": {

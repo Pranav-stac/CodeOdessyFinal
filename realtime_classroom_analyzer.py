@@ -853,12 +853,12 @@ class RealtimeClassroomAnalyzer:
                 activity = 'listening'
                 confidence = 0.7
             else:
-                activity = 'listening'  # Default to listening
-                confidence = 0.5
+                activity = 'unknown'  # Don't assume listening
+                confidence = 0.3
         else:
-            # Default to listening if we can't determine
-            activity = 'listening'
-            confidence = 0.4
+            # Default to unknown if we can't determine
+            activity = 'unknown'
+            confidence = 0.2
         
         # Posture detection
         if (left_shoulder[1] > 0 and right_shoulder[1] > 0 and 
@@ -999,21 +999,33 @@ class RealtimeClassroomAnalyzer:
                     elif pose_analysis['activity'] == 'writing':
                         attention = 'focused'
                     else:
-                        try:
-                            # Use random for attention calculation
-                            rand_val = random.random()
-                            if rand_val < engagement_prob:
-                                attention = 'partially_focused'
-                            else:
-                                attention = 'distracted'
-                        except Exception as e:
-                            # Fallback if random fails in executable
-                            print(f"⚠️ Random module error in attention calculation: {e}")
-                            # Use deterministic fallback based on position
-                            if engagement_prob > 0.7:
-                                attention = 'partially_focused'
-                            else:
-                                attention = 'distracted'
+                        # Use deterministic calculation based on multiple factors
+                        attention_score = 0.0
+                        
+                        # Activity-based scoring
+                        if pose_analysis['activity'] == 'listening':
+                            attention_score += 0.6 * pose_analysis.get('confidence', 0.5)
+                        elif pose_analysis['activity'] == 'writing':
+                            attention_score += 0.9
+                        elif pose_analysis['activity'] == 'raising_hand':
+                            attention_score += 1.0
+                        elif pose_analysis['activity'] == 'unknown':
+                            attention_score += 0.3
+                        
+                        # Position-based scoring
+                        attention_score += engagement_prob * 0.4
+                        
+                        # Confidence-based bonus
+                        attention_score += pose_analysis.get('confidence', 0.5) * 0.2
+                        
+                        # Determine attention based on total score
+                        if attention_score >= 0.8:
+                            attention = 'focused'
+                        elif attention_score >= 0.5:
+                            attention = 'partially_focused'
+                        else:
+                            attention = 'distracted'
+                    
                     annotation['attributes'][attr_name] = attention
                 
                 elif attr_name == 'engagement':
@@ -1022,25 +1034,25 @@ class RealtimeClassroomAnalyzer:
                     posture = pose_analysis.get('posture', 'sitting')
                     confidence = pose_analysis.get('confidence', 0.0)
                     
-                    # Direct engagement indicators
+                    # Direct engagement indicators (more strict)
                     if activity in ['raising_hand', 'writing']:
                         engagement = 'engaged'
-                    elif activity == 'listening' and posture in ['sitting', 'standing'] and confidence > 0.5:
+                    elif activity == 'listening' and posture in ['sitting', 'standing'] and confidence > 0.6:
                         # Listening with good posture and high confidence indicates engagement
                         engagement = 'engaged'
                     else:
                         # Use deterministic calculation based on multiple factors
                         engagement_score = 0.0
                         
-                        # Activity-based scoring
+                        # Activity-based scoring (more realistic)
                         if activity == 'listening':
-                            engagement_score += 0.6 * confidence  # Weight by confidence
+                            engagement_score += 0.4 * confidence  # Lower base score for listening
                         elif activity == 'writing':
                             engagement_score += 0.9
                         elif activity == 'raising_hand':
                             engagement_score += 1.0
                         elif activity == 'unknown':
-                            engagement_score += 0.3
+                            engagement_score += 0.1  # Much lower for unknown
                         
                         # Posture-based scoring
                         if posture == 'sitting':
@@ -1054,9 +1066,11 @@ class RealtimeClassroomAnalyzer:
                         # Confidence-based bonus
                         engagement_score += confidence * 0.2
                         
-                        # Determine engagement based on total score
-                        if engagement_score >= 0.6:
+                        # Determine engagement based on total score (more realistic thresholds)
+                        if engagement_score >= 0.8:
                             engagement = 'engaged'
+                        elif engagement_score >= 0.5:
+                            engagement = 'partially_engaged'
                         else:
                             engagement = 'not_engaged'
                     
@@ -1069,7 +1083,7 @@ class RealtimeClassroomAnalyzer:
             
             self.frame_stats['activities'][activity] += 1
             self.frame_stats['attention_levels'][attention] += 1
-            if engagement == 'engaged':
+            if engagement in ['engaged', 'partially_engaged']:
                 self.frame_stats['engaged_count'] += 1
             
             # Add metadata
@@ -1159,11 +1173,12 @@ class RealtimeClassroomAnalyzer:
                 self.draw_pose_skeleton(vis_frame, keypoints)
             
             # Create label
+            engagement_display = 'ENGAGED' if engagement == 'engaged' else 'PARTIALLY ENGAGED' if engagement == 'partially_engaged' else 'NOT ENGAGED'
             label_lines = [
                 f"{student_id}",
                 f"{activity}",
                 f"{attention}",
-                f"{'ENGAGED' if engagement == 'engaged' else 'NOT ENGAGED'}"
+                f"{engagement_display}"
             ]
             
             # Draw label background
@@ -1174,7 +1189,14 @@ class RealtimeClassroomAnalyzer:
             # Draw label text
             for line_idx, line in enumerate(label_lines):
                 text_y = y - label_height + 15 + line_idx * 20
-                text_color = (0, 255, 0) if line == 'ENGAGED' else (0, 0, 255) if line == 'NOT ENGAGED' else (255, 255, 255)
+                if line == 'ENGAGED':
+                    text_color = (0, 255, 0)  # Green
+                elif line == 'PARTIALLY ENGAGED':
+                    text_color = (0, 255, 255)  # Yellow
+                elif line == 'NOT ENGAGED':
+                    text_color = (0, 0, 255)  # Red
+                else:
+                    text_color = (255, 255, 255)  # White
                 cv2.putText(vis_frame, line, (x + 5, text_y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, text_color, 1)
         
         # Draw statistics overlay
@@ -1333,7 +1355,7 @@ class RealtimeClassroomAnalyzer:
                 student_file = os.path.join(self.student_data_dir, f"{student_id}_data.json")
                 
                 activities = [r['activity'] for r in track]
-                engagements = [r['engagement'] for r in track if r['engagement']]
+                engagements = [r['engagement'] for r in track if r['engagement'] in ['engaged', 'partially_engaged']]
                 attention_levels = [r['attention_level'] for r in track]
                 
                 student_data = {
@@ -1406,7 +1428,7 @@ class RealtimeClassroomAnalyzer:
             for record in track:
                 all_activities.append(record['activity'])
                 all_attention.append(record['attention_level'])
-                if record['engagement']:
+                if record['engagement'] in ['engaged', 'partially_engaged']:
                     all_engagement.append(record['engagement'])
         
         activity_stats = {
@@ -1438,7 +1460,7 @@ class RealtimeClassroomAnalyzer:
             for record in track:
                 if record['position_zone'] == zone:
                     zone_activities.append(record['activity'])
-                    if record['engagement']:
+                    if record['engagement'] in ['engaged', 'partially_engaged']:
                         zone_engagement.append(record['engagement'])
         
         return {
@@ -1548,7 +1570,7 @@ class RealtimeClassroomAnalyzer:
         for student_id, track in self.student_tracks.items():
             if len(track) >= 3:
                 activities = [r['activity'] for r in track]
-                engagements = [r['engagement'] for r in track if r['engagement']]
+                engagements = [r['engagement'] for r in track if r['engagement'] in ['engaged', 'partially_engaged']]
                 attention_levels = [r['attention_level'] for r in track]
                 
                 # Find associated face with base64 image
@@ -1620,7 +1642,7 @@ class RealtimeClassroomAnalyzer:
             for record in track:
                 all_activities.append(record['activity'])
                 all_attention.append(record['attention_level'])
-                if record['engagement']:
+                if record['engagement'] in ['engaged', 'partially_engaged']:
                     all_engagement.append(record['engagement'])
         
         return {

@@ -1,0 +1,45 @@
+{
+  "overall_statistics": {
+    "total_activity_records": 6390,
+    "activity_distribution": {
+      "writing": 3292,
+      "unknown": 2845,
+      "listening": 253
+    },
+    "attention_distribution": {
+      "focused": 3395,
+      "partially_focused": 2995
+    },
+    "engagement_distribution": {
+      "engaged": 3545,
+      "partially_engaged": 2304
+    },
+    "overall_engagement_rate": "91.5%"
+  },
+  "by_zone": {
+    "front_zone": {
+      "activity_distribution": {
+        "unknown": 2268,
+        "writing": 1193,
+        "listening": 103
+      },
+      "engagement_rate": "100.0%"
+    },
+    "middle_zone": {
+      "activity_distribution": {
+        "writing": 1853,
+        "unknown": 574,
+        "listening": 149
+      },
+      "engagement_rate": "79.1%"
+    },
+    "back_zone": {
+      "activity_distribution": {
+        "writing": 246,
+        "listening": 1,
+        "unknown": 3
+      },
+      "engagement_rate": "98.8%"
+    }
+  }
+}

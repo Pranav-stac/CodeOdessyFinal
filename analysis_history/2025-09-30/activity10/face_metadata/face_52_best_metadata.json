@@ -1,0 +1,16 @@
+{
+  "face_id": 52,
+  "image_filename": "face_52_best.jpg",
+  "frame_number": 95,
+  "bbox": [
+    1167,
+    220,
+    1189,
+    247
+  ],
+  "confidence": 0.6213390827178955,
+  "quality_score": 0.5955271325618654,
+  "combined_score": 0.6135954976710865,
+  "timestamp": 1759043961.789289,
+  "is_best_image": true
+}

@@ -1,7 +1,7 @@
 {
   "video_name": "test3.mp4",
   "video_path": "video_processing\\2025-09-29\\input\\test3.mp4",
-  "processed_at": "2025-09-28T09:25:57.874668",
+  "processed_at": "2025-09-28T12:55:45.974888",
   "status": "completed",
   "output_directory": "analysis_history\\2025-09-29\\test3",
   "analysis_summary": {
@@ -169,6 +169,6 @@
     "method": "lightweight_vision",
     "frame_time": 0.5,
     "video_path": "video_processing\\2025-09-29\\input\\test3.mp4",
-    "timestamp": "2025-09-28T09:25:57.851209"
+    "timestamp": "2025-09-28T12:55:45.923591"
   }
 }

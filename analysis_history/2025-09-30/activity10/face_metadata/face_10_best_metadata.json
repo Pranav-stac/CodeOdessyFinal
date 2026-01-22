@@ -1,0 +1,16 @@
+{
+  "face_id": 10,
+  "image_filename": "face_10_best.jpg",
+  "frame_number": 39,
+  "bbox": [
+    1287,
+    400,
+    1317,
+    431
+  ],
+  "confidence": 0.7014442682266235,
+  "quality_score": 0.6288073145562096,
+  "combined_score": 0.6796531821254993,
+  "timestamp": 1759043961.6333451,
+  "is_best_image": true
+}

@@ -9,15 +9,13 @@
   "behavior_analysis": {
     "dominant_activity": "unknown",
     "activity_distribution": {
-      "writing": 29,
-      "unknown": 250,
-      "listening": 11
+      "writing": 39,
+      "unknown": 251
     },
-    "engagement_rate": "100.0%",
+    "engagement_rate": "28.3%",
     "attention_distribution": {
-      "focused": 29,
-      "partially_focused": 164,
-      "distracted": 97
+      "focused": 39,
+      "partially_focused": 251
     }
   },
   "face_data": {

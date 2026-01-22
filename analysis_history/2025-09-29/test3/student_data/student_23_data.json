@@ -11,10 +11,9 @@
     "activity_distribution": {
       "unknown": 5
     },
-    "engagement_rate": "100.0%",
+    "engagement_rate": "0.0%",
     "attention_distribution": {
-      "distracted": 2,
-      "partially_focused": 3
+      "partially_focused": 5
     }
   },
   "face_data": {

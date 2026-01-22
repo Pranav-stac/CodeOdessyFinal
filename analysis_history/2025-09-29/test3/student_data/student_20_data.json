@@ -7,17 +7,16 @@
     "position_zone": "middle"
   },
   "behavior_analysis": {
-    "dominant_activity": "listening",
+    "dominant_activity": "writing",
     "activity_distribution": {
-      "unknown": 57,
-      "listening": 112,
-      "writing": 67
+      "unknown": 82,
+      "writing": 151,
+      "listening": 3
     },
-    "engagement_rate": "100.0%",
+    "engagement_rate": "75.8%",
     "attention_distribution": {
-      "partially_focused": 105,
-      "distracted": 64,
-      "focused": 67
+      "partially_focused": 85,
+      "focused": 151
     }
   },
   "face_data": {
